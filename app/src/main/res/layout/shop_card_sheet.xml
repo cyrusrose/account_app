@@ -6,7 +6,7 @@
     <data>
         <variable
             name="vm"
-            type="com.cyril.account.ui.shopwindow.ShopWindowViewModel"/>
+            type="com.cyril.account.shopwindow.presentation.ShopWindowViewModel"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

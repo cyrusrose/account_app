@@ -1,6 +1,6 @@
 package com.cyril.account
 
-import com.cyril.account.ui.home.Card
+import com.cyril.account.home.domain.Card
 import org.junit.Test
 
 import org.junit.Assert.*

@@ -6,13 +6,13 @@
     <data>
         <variable
             name="vm"
-            type="com.cyril.account.ui.history.HistoryViewModel" />
+            type="com.cyril.account.history.presentation.HistoryViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.history.HistoryFragment">
+        tools:context=".history.presentation.ui.HistoryFragment">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/history_ab"

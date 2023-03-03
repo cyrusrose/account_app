@@ -6,7 +6,7 @@
     <data>
         <variable
             name="vm"
-            type="com.cyril.account.ui.start.StartViewModel"/>
+            type="com.cyril.account.start.presentation.StartViewModel"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         android:layout_marginTop="?actionBarSize"
         android:layout_marginBottom="?actionBarSize"
-        tools:context=".ui.fire.FireFragment">
+        tools:context=".fire.presentation.ui.FireFragment">
 
 
         <FrameLayout

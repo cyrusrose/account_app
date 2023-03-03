@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="?actionBarSize"
-    tools:context=".ui.fire.FireFragment">
+    tools:context=".fire.presentation.ui.FireFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv"
