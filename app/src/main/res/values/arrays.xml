@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="type_array">
+        <item>@string/both_title</item>
+        <item>@string/to_title</item>
+        <item>@string/from_title</item>
+        <item>@string/change_title</item>
+    </string-array>
+
+    <string-array name="value_array">
+        <item>both</item>
+        <item>to</item>
+        <item>from</item>
+        <item>change</item>
+    </string-array>
+</resources>

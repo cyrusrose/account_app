@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "title": "By phone number",
+    "description": ""
+  },
+  {
+    "id": 2,
+    "title": "From card to card",
+    "description": ""
+  },
+  {
+    "id": 3,
+    "title": "Between your accounts",
+    "description": "In your bank"
+  },
+  {
+    "id": 0,
+    "title": "Soon",
+    "description": "Something new"
+  },
+  {
+    "id": 0,
+    "title": "Soon",
+    "description": "Something new"
+  },
+  {
+    "id": 0,
+    "title": "Soon",
+    "description": "Something new"
+  },
+  {
+    "id": 0,
+    "title": "Soon",
+    "description": "Something new"
+  },
+  {
+    "id": 0,
+    "title": "Soon",
+    "description": "Something new"
+  }
+]

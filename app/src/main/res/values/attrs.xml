@@ -1,0 +1,8 @@
+
+<resources>
+    <attr name="colorFire" format="color" />
+    <attr name="colorOnFire" format="color" />
+    <attr name="colorFireContainer" format="color" />
+    <attr name="colorOnFireContainer" format="color" />
+    <attr name="harmonizeFire" format="boolean" />
+</resources>

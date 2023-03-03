@@ -1,0 +1,78 @@
+<resources>
+    <string name="app_name">Account</string>
+    <string name="title_home">Home</string>
+    <string name="title_history">History</string>
+    <string name="title_payment">Payment</string>
+    <string name="title_shopwindow">Window</string>
+    <string name="cards_title">Cards</string>
+    <string name="deposits_title">Deposits</string>
+    <string name="accounts_title">Accounts</string>
+
+    <!-- Card names -->
+    <string name="visa_name" translatable="false">Visa</string>
+    <string name="visa_content">Product\'s description</string>
+    <string name="mir_name" translatable="false">MIR</string>
+    <string name="mir_content">Product\'s description</string>
+    <string name="mc_name" translatable="false">MasterCard</string>
+    <string name="mc_content">Product\'s description</string>
+
+    <string name="services_title">Services</string>
+    <string name="choose_title">Choose</string>
+    <string name="quick_transfer_title">Quick transfer</string>
+    <string name="cancel_title">Cancel</string>
+    <string name="transfers_title">Transfers</string>
+    <string name="payment_title">Payment</string>
+    <string name="receiver_phone_title">Receiver phone</string>
+    <string name="sum_of_money_title">Sum of money</string>
+    <string name="send_title">Send</string>
+    <string name="receiver_card_title">Receiver card</string>
+    <string name="client_number_title">Client number</string>
+    <string name="contact_name_title">Receiver</string>
+    <string name="receiver_name_title">Receiver: %s</string>
+    <string name="login_title">Login</string>
+    <string name="password_title">Password</string>
+    <string name="enter_title">Enter</string>
+    <string name="failed_to_sign_in">Failed to sign in</string>
+    <string name="fields_not_empty">Fields should not be empty</string>
+    <string name="choose_it_title">Choose?</string>
+    <string name="yes_title">Yes</string>
+    <string name="no_title">No</string>
+    <string name="delete_title">Delete</string>
+    <string name="not_enough_title">Not enough money</string>
+    <string name="success_title">Success</string>
+    <string name="name_title">Name</string>
+    <string name="phone_title">Phone</string>
+    <string name="default_title">Default</string>
+    <string name="actions">Actions</string>
+    <string name="not_empty">Not Empty!</string>
+    <string name="content_title">Via %s</string>
+    <string name="to_title">To</string>
+    <string name="from_title">From</string>
+    <string name="change_title">Between</string>
+    <string name="both_title">All</string>
+    <string name="search_title">Search</string>
+    <string name="wait_title">Wait a moment</string>
+    <string name="sum_title">Sum &lt; 0.01</string>
+    <string name="contacts_title">No permission is given for reading contacts</string>
+    <string name="digits_title">Digits number != 11</string>
+    <string name="strings_title">Error in string conversion</string>
+    <string name="bie_title">Bie!</string>
+    <string name="same_error">It\'s the same account</string>
+    <string name="sending_error">Error during sending money</string>
+    <string name="working_error">Unscheduled work on the server</string>
+    <string name="trying_error">Trying again...</string>
+    <string name="interest_title">Interest rate: %s</string>
+    <string name="min_sum_title">Min sum: %s</string>
+    <string name="months_title">Months: %s</string>
+    <string name="user_error">User has logged out</string>
+    <string name="back_again_title">Press back again to leave</string>
+    <string name="codes_error">Error reading codes</string>
+    <string name="sum_other_title">Sum &lt; %s</string>
+    <string name="sum_less_title">Sum %s &lt; %s</string>
+    <string name="choose_card_title">Choose a card</string>
+    <string name="min_sum_code_title">Min sum: %s %s</string>
+    <string name="receiver_error">Receiver\'s card is not present</string>
+    <string name="card_add_error">Error during adding card</string>
+    <string name="client_error">Problem with client</string>
+    <string name="code_error">Code wasn\'t chosen</string>
+</resources>

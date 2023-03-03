@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/drawable/ic_big_person.xml" value="0.3235" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/drawable/ic_lock.xml" value="0.3235" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/drawable/ic_person.xml" value="0.3235" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/drawable/ic_person_small.xml" value="0.3235" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/drawable/ic_profile.xml" value="0.3235" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/drawable/mir_svg.xml" value="0.3235" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/layout/content_main.xml" value="0.3625" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/layout/content_persona.xml" value="0.18541666666666667" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/layout/fire_layout.xml" value="0.3625" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/layout/fragment_home.xml" value="0.3625" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/layout/fragment_start.xml" value="0.3625" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/layout/home_card_sheet.xml" value="0.25" />
+        <entry key="..\:/Users/acer/AndroidStudioProjects/5/Account/app/src/main/res/menu/bottom_nav_menu.xml" value="0.3625" />
+      </map>
+    </option>
+  </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="web" url="file://$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17_PREVIEW" project-jdk-name="17" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

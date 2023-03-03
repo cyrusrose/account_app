@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="vm"
+            type="com.cyril.account.ui.history.HistoryViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.history.HistoryFragment">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/history_ab"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <FrameLayout
+                android:orientation="horizontal"
+                android:id="@+id/content"
+                android:gravity="center"
+                android:padding="8dp"
+                android:layout_width="match_parent"
+                app:layout_scrollFlags="scroll|enterAlways|snap"
+                android:layout_height="wrap_content">
+
+                <Spinner
+                    android:layout_gravity="end|center_vertical"
+                    android:id="@+id/spinner"
+                    app:spinnerItems="@{vm.items}"
+                    app:selectedSpinnerItem="@={vm.selectedItem}"
+                    android:layout_width="140dp"
+                    android:layout_height="match_parent" />
+
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/search"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="start"
+                    style="@style/Widget.App.TextInputLayout.SearchBox"
+                    app:startIconDrawable="@drawable/ic_search"
+                    android:layout_marginEnd="140dp"
+                    android:hint="@string/search_title">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textStyle="italic" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </FrameLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <include
+            android:id="@+id/content_history"
+            layout="@layout/content_history" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

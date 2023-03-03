@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/navigation_start">
+
+    <fragment
+        app:route="home"
+        android:id="@+id/navigation_home"
+        android:name="com.cyril.account.ui.home.HomeFragment"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_navigation_home_to_personaFragment"
+            app:destination="@id/personaFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_shopwindow"
+        android:name="com.cyril.account.ui.shopwindow.ShopWindowFragment"
+        tools:layout="@layout/fragment_shopwindow" />
+
+    <fragment
+        android:id="@+id/navigation_payment"
+        android:name="com.cyril.account.ui.payment.PaymentFragment"
+        tools:layout="@layout/fragment_payment" >
+
+        <action
+            android:id="@+id/action_payment_to_fire"
+            app:destination="@id/navigation_fire" />
+        <action
+            android:id="@+id/action_payment_to_fire_card"
+            app:destination="@id/navigation_fire_card" />
+        <action
+            android:id="@+id/action_payment_to_fire_accounts"
+            app:destination="@id/navigation_fire_accounts" />
+        <action
+            android:id="@+id/action_payment_to_fire_payment"
+            app:destination="@id/navigation_fire_payment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_fire"
+        android:name="com.cyril.account.ui.fire.FireFragment"
+        tools:layout="@layout/fragment_fire">
+        <argument
+            android:name="transfer"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="phone"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/navigation_history"
+        android:name="com.cyril.account.ui.history.HistoryFragment"
+        tools:layout="@layout/fragment_fire" />
+
+    <fragment
+        android:id="@+id/navigation_fire_card"
+        android:name="com.cyril.account.ui.fire.FireCardFragment"
+        tools:layout="@layout/fragment_fire_card">
+        <argument
+            android:name="transfer"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_fire_accounts"
+        android:name="com.cyril.account.ui.fire.FireAccountsFragment"
+        tools:layout="@layout/fragment_accounts" >
+        <argument
+            android:name="transfer"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_fire_payment"
+        android:name="com.cyril.account.ui.fire.FirePaymentFragment"
+        tools:layout="@layout/content_fire_payment" >
+        <argument
+            android:name="transfer"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="client_no"
+            app:argType="java.math.BigInteger" />
+        <argument
+            android:name="client_ssn"
+            app:argType="java.math.BigInteger" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_start"
+        app:route="start"
+        android:name="com.cyril.account.ui.start.StartFragment"
+        tools:layout="@layout/fragment_start" >
+        <action
+            android:id="@+id/action_start_to_home"
+            app:destination="@id/navigation_home" />
+        <argument
+            android:name="error"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+    <action
+        android:id="@+id/global_payment_to_fire"
+        app:destination="@id/navigation_fire"
+        app:popUpTo="@id/navigation_payment"
+        app:popUpToInclusive="false" />
+
+    <action
+        android:id="@+id/global_navigation_payment"
+        app:destination="@id/navigation_payment"
+        app:popUpTo="@id/navigation_home"
+        app:popUpToInclusive="false"
+        app:popUpToSaveState="true"
+        app:launchSingleTop="true"
+        app:restoreState="true"/>
+
+    <action android:id="@+id/global_navigation_start"
+        app:destination="@id/navigation_start"/>
+    <fragment
+        android:id="@+id/personaFragment"
+        android:name="com.cyril.account.ui.home.PersonaFragment"
+        android:label="fragment_persona"
+        tools:layout="@layout/fragment_persona" />
+</navigation>

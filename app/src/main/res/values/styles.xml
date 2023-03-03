@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="viewStyle" >
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50dp</item>
+    </style>
+
+    <style name="bar_style" >
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="ThemeOverlay.App.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/ModalBottomSheetDialog</item>
+    </style>
+
+    <style name="ModalBottomSheetDialog" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="shapeAppearance">@style/ShapeAppearance.App.LargeComponent</item>
+        <item name="paddingBottomSystemWindowInsets">true</item>
+        <item name="behavior_peekHeight">200dp</item>
+    </style>
+
+    <style name="ShapeAppearance.App.LargeComponent" parent="ShapeAppearance.MaterialComponents.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">28dp</item>
+        <item name="cornerSizeTopRight">28dp</item>
+    </style>
+
+    <style name="TextAppearance.App.LabelLarge" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">@dimen/md_sys_typescale_label_large_size</item>
+        <item name="android:lineHeight">@dimen/md_sys_typescale_label_large_line_height</item>
+    </style>
+
+    <style name="TextAppearance.App.LabelLarge.Default" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">@dimen/icon_size</item>
+        <item name="android:lineHeight">@dimen/icon_line_height</item>
+    </style>
+
+    <style name="TextAppearance.App.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">@dimen/md_sys_typescale_body_large_size</item>
+        <item name="android:lineHeight">@dimen/md_sys_typescale_body_large_line_height</item>
+    </style>
+
+    <style name="Widget.App.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemPaddingBottom">10dp</item>
+        <item name="elevation">@dimen/m3_sys_elevation_level0</item>
+    </style>
+
+    <style name="Widget.App.TextInputLayout.SearchBox" parent="Widget.Material3.TextInputLayout.FilledBox">
+        <item name="boxBackgroundColor">@color/white</item>
+    </style>
+
+</resources>

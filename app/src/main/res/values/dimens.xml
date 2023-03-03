@@ -1,0 +1,11 @@
+<resources>
+    <dimen name="md_sys_typescale_label_large_size">20sp</dimen>
+    <dimen name="md_sys_typescale_label_large_line_height">26sp</dimen>
+    <dimen name="md_sys_typescale_body_large_size">20sp</dimen>
+    <dimen name="md_sys_typescale_body_large_line_height">28sp</dimen>
+    <dimen name="person_size">100dp</dimen>
+
+    <!-- Icon Buttons   -->
+    <dimen name="icon_size">14dp</dimen>
+    <dimen name="icon_line_height">20dp</dimen>
+</resources>
