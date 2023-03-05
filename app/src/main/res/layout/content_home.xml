@@ -4,13 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:id="@+id/variants"
+    android:overScrollMode="never"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".home.presentation.ui.HomeFragment">
+    tools:context=".home.presentation.HomeFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:paddingBottom="100dp"
+        android:paddingBottom="20dp"
         android:layout_height="match_parent">
 
         <TextView

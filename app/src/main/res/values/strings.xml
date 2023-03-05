@@ -68,9 +68,9 @@
     <string name="back_again_title">Press back again to leave</string>
     <string name="codes_error">Error reading codes</string>
     <string name="sum_other_title">Sum &lt; %s</string>
-    <string name="sum_less_title">Sum %s &lt; %s</string>
+    <string name="sum_less_title">Sum %1$s &lt; %2$s</string>
     <string name="choose_card_title">Choose a card</string>
-    <string name="min_sum_code_title">Min sum: %s %s</string>
+    <string name="min_sum_code_title">Min sum: %1$s %2$s</string>
     <string name="receiver_error">Receiver\'s card is not present</string>
     <string name="card_add_error">Error during adding card</string>
     <string name="client_error">Problem with client</string>

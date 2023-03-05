@@ -1,4 +1,4 @@
-package com.cyril.account.home.presentation.ui
+package com.cyril.account.home.presentation
 
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater

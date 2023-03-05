@@ -1,4 +1,4 @@
-package com.cyril.account.start.presentation.ui
+package com.cyril.account.start.presentation
 
 import android.os.Bundle
 import android.util.Log
@@ -11,11 +11,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
 import com.cyril.account.databinding.FragmentStartBinding
-import com.cyril.account.start.presentation.StartViewModel
 import com.google.android.material.snackbar.Snackbar
 
 class StartFragment : Fragment() {

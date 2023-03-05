@@ -3,14 +3,16 @@ package com.cyril.account.shopwindow.presentation
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.*
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
 import com.cyril.account.home.data.utils.CardTypes
 import com.cyril.account.home.data.repository.PersonalRep
 import com.cyril.account.core.data.response.UserResp
-import com.cyril.account.history.presentation.ui.BindableSpinnerAdapter.SpinnerItem
+import com.cyril.account.history.presentation.BindableSpinnerAdapter.SpinnerItem
 import com.cyril.account.home.domain.Card
+import com.cyril.account.utils.Resource
+import com.cyril.account.utils.Resource.Loading
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -57,6 +59,8 @@ class ShopWindowViewModel(private val app: Application) : AndroidViewModel(app) 
                 }
     }
         .asLiveData()
+
+    private val selectedCard = MutableStateFlow<Resource<Card>>(Loading())
 
     fun setUser(user: UserResp) {
         val mUser = usersState.value

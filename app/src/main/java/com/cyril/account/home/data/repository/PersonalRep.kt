@@ -4,14 +4,14 @@ import android.content.res.Resources
 import android.util.Log
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.MutableLiveData
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel.UserError
 import com.cyril.account.R
 import com.cyril.account.core.data.RetrofitClient
 import com.cyril.account.home.data.api.PersonalApi
 import com.cyril.account.home.data.utils.CardTypes
 import com.cyril.account.core.data.response.ClientResp
-import com.cyril.account.history.presentation.ui.BindableSpinnerAdapter
+import com.cyril.account.history.presentation.BindableSpinnerAdapter
 import com.cyril.account.home.data.response.*
 import com.cyril.account.home.domain.Card
 import kotlinx.coroutines.*

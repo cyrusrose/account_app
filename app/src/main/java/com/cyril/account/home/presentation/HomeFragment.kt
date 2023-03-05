@@ -1,4 +1,4 @@
-package com.cyril.account.home.presentation.ui
+package com.cyril.account.home.presentation
 
 import android.os.Bundle
 import android.util.Log
@@ -10,11 +10,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
 import com.cyril.account.databinding.FragmentHomeBinding
-import com.cyril.account.home.presentation.HomeViewModel
 import com.cyril.account.home.domain.Card
 import com.cyril.account.start.presentation.StartViewModel
 import dev.chrisbanes.insetter.applyInsetter
@@ -87,9 +86,18 @@ class HomeFragment : Fragment() {
         val depAdp = CardRecyclerViewAdapter(CardDiffUtil())
         val clientAccAdp = CardRecyclerViewAdapter(CardDiffUtil())
 
-        with(ui.home.cardRv) { adapter = cardAdp }
-        with(ui.home.depositRv) { adapter = depAdp }
-        with(ui.home.accountRv) { adapter = clientAccAdp }
+        with(ui.home.cardRv) {
+            adapter = cardAdp
+            isNestedScrollingEnabled = false
+        }
+        with(ui.home.depositRv) {
+            adapter = depAdp
+            isNestedScrollingEnabled = false
+        }
+        with(ui.home.accountRv) {
+            adapter = clientAccAdp
+            isNestedScrollingEnabled = false
+        }
 
         homeViewModel.card.observe(viewLifecycleOwner) {
             cardAdp.submitList(it.cards)

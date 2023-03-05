@@ -18,8 +18,6 @@ data class Payment(
 
 data class Title(val title: String): TransferType
 
-object Padding : TransferType
-
 
 
 

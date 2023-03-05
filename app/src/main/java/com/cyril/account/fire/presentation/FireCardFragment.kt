@@ -1,4 +1,4 @@
-package com.cyril.account.fire.presentation.ui
+package com.cyril.account.fire.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,24 +13,23 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
-import com.cyril.account.databinding.FragmentFirePaymentBinding
-import com.cyril.account.fire.presentation.FireViewModel
-import com.cyril.account.home.presentation.ui.CardDiffUtil
+import com.cyril.account.databinding.FragmentFireCardBinding
+import com.cyril.account.home.presentation.CardDiffUtil
 import com.cyril.account.start.presentation.StartViewModel
 import dev.chrisbanes.insetter.applyInsetter
 import java.math.BigDecimal
 import java.util.*
 
-class FirePaymentFragment : Fragment() {
+class FireCardFragment : Fragment() {
     private val fireVm: FireViewModel by viewModels()
     private val mainVm: MainViewModel by activityViewModels()
     private val startVm: StartViewModel by navGraphViewModels(R.id.navigation_start)
 
-    private lateinit var ui: FragmentFirePaymentBinding
-    private val args: FirePaymentFragmentArgs by navArgs()
+    private lateinit var ui: FragmentFireCardBinding
+    private val args: FireCardFragmentArgs by navArgs()
 
     private lateinit var adp: MyCardRecyclerViewAdapter
 
@@ -39,7 +38,7 @@ class FirePaymentFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        ui = FragmentFirePaymentBinding.inflate(inflater, container, false)
+        ui = FragmentFireCardBinding.inflate(inflater, container, false)
         return ui.root
     }
 
@@ -88,23 +87,20 @@ class FirePaymentFragment : Fragment() {
     }
 
     private fun makingTransfer() {
-        ui.content.clientNo.editText
-            ?.setText(args.clientNo.toString())
-
         ui.content.send.setOnClickListener {
             val moneyStr = ui.content.money.editText?.text.toString()
-            val clientNoStr = ui.content.clientNo.editText?.text.toString()
+            val cardNoStr = ui.content.card.editText?.text.toString()
 
-            if (moneyStr.isNotBlank() && clientNoStr.isNotBlank()) {
+            if (moneyStr.isNotBlank() && cardNoStr.isNotBlank()) {
                 try {
                     val money = moneyStr.toBigDecimal()
-                    val clientNo = clientNoStr.toBigInteger()
+                    val cardNo = cardNoStr.toBigInteger()
 
                     if (money < BigDecimal(0.01))
                         ui.content.money.error = getString(R.string.sum_title)
                     else
                         adp.card.value?.let {
-                            fireVm.sendMoneyByClientNo(money, UUID.fromString(it.id), clientNo, args.clientSsn)
+                            fireVm.sendMoneyByCard(money, UUID.fromString(it.id), cardNo)
                         }
                 } catch (e: Exception) {
                     mainVm.setUserError(getString(R.string.strings_title))
@@ -112,17 +108,18 @@ class FirePaymentFragment : Fragment() {
             } else {
                 if (moneyStr.isBlank())
                     ui.content.money.error = getString(R.string.not_empty)
-                if (clientNoStr.isBlank())
-                    ui.content.clientNo.error = getString(R.string.not_empty)
+                if (cardNoStr.isBlank())
+                    ui.content.card.error = getString(R.string.not_empty)
             }
+
         }
 
         ui.content.money.editText?.doOnTextChanged { text, _, _, _ ->
             ui.content.money.error = null
         }
 
-        ui.content.clientNo.editText?.doOnTextChanged { text, _, _, _ ->
-            ui.content.clientNo.error = null
+        ui.content.card.editText?.doOnTextChanged { text, _, _, _ ->
+            ui.content.card.error = null
         }
     }
 

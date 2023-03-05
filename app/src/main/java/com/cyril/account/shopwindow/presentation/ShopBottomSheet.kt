@@ -1,4 +1,4 @@
-package com.cyril.account.shopwindow.presentation.ui
+package com.cyril.account.shopwindow.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,10 +11,9 @@ import com.cyril.account.R
 import com.cyril.account.databinding.ShopCardSheetBinding
 import com.cyril.account.core.data.response.UserResp
 import com.cyril.account.fire.presentation.FireViewModel
-import com.cyril.account.fire.presentation.ui.MyCardRecyclerViewAdapter
+import com.cyril.account.fire.presentation.MyCardRecyclerViewAdapter
 import com.cyril.account.home.domain.Card
-import com.cyril.account.home.presentation.ui.CardDiffUtil
-import com.cyril.account.shopwindow.presentation.ShopWindowViewModel
+import com.cyril.account.home.presentation.CardDiffUtil
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch

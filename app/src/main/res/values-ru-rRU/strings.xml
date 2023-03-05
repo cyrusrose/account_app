@@ -56,16 +56,16 @@
     <string name="sending_error">Ошибка перевода средств</string>
     <string name="working_error">Внеплановые работы на сервере</string>
     <string name="trying_error">Пытаемся сново...</string>
-    <string name="interest_title">Ставка процента: %s</string>
+    <string name="interest_title" formatted="true">Ставка процента: %s</string>
     <string name="min_sum_title">Мин сумма: %s</string>
     <string name="months_title">Месяцы: %s</string>
     <string name="user_error">Пользователь вышел</string>
     <string name="back_again_title">Нажми еще раз для выхода</string>
     <string name="codes_error">Ошибка чтения кодов</string>
     <string name="sum_other_title">" Сумма &lt; %s"</string>
-    <string name="sum_less_title">" Сумма %s &lt; %s"</string>
+    <string name="sum_less_title">" Сумма %1$s &lt; %2$s"</string>
     <string name="choose_card_title">Выберите карту</string>
-    <string name="min_sum_code_title">Мин сумма: %s %s</string>
+    <string name="min_sum_code_title">Мин сумма: %1$s %2$s</string>
     <string name="receiver_error">Карта получателя отсутствует</string>
     <string name="card_add_error">Ошибка добавления карты</string>
     <string name="client_error">Проблема с клиентом</string>

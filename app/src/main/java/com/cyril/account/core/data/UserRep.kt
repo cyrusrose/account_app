@@ -4,7 +4,7 @@ import android.content.res.AssetManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.util.Log
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.payment.domain.Payment
 import com.cyril.account.payment.domain.Transfer
 import com.google.gson.Gson

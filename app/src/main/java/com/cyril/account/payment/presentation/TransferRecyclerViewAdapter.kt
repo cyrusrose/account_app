@@ -1,4 +1,4 @@
-package com.cyril.account.payment.presentation.ui
+package com.cyril.account.payment.presentation
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -21,15 +21,13 @@ class TransferRecyclerViewAdapter(util: TransferDiffUtil) : ListAdapter<Transfer
         return when (getItem(position)) {
             is Title -> TITLE
             is Transfer, is Payment -> TRANSFER
-            is Padding -> PADDING
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return when (viewType) {
-            TRANSFER -> TransferHolder.from(parent, tls)
             TITLE -> TitleHolder.from(parent)
-            else -> PaddingHolder.from(parent)
+            else -> TransferHolder.from(parent, tls)
         }
     }
 
@@ -97,19 +95,8 @@ class TransferRecyclerViewAdapter(util: TransferDiffUtil) : ListAdapter<Transfer
         }
     }
 
-    class PaddingHolder private constructor(
-        private val ui: PaddingItemBinding
-    ): ViewHolder(ui.root) {
-        companion object {
-            fun from(parent: ViewGroup) = PaddingHolder(
-                PaddingItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            )
-        }
-    }
-
     companion object {
         const val TRANSFER = 0
         const val TITLE = 1
-        const val PADDING = 2
     }
 }

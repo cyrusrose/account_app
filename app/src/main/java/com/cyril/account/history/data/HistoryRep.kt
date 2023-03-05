@@ -2,11 +2,11 @@ package com.cyril.account.history.data
 
 import android.content.res.Resources
 import android.util.Log
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.R
 import com.cyril.account.core.data.RetrofitClient
 import com.cyril.account.history.domain.History
-import com.cyril.account.history.presentation.ui.BindableSpinnerAdapter
+import com.cyril.account.history.presentation.BindableSpinnerAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*

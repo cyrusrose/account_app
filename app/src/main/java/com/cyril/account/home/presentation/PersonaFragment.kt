@@ -1,4 +1,4 @@
-package com.cyril.account.home.presentation.ui
+package com.cyril.account.home.presentation
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -9,7 +9,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.R
 import com.cyril.account.databinding.FragmentPersonaBinding
 import com.cyril.account.start.presentation.StartViewModel

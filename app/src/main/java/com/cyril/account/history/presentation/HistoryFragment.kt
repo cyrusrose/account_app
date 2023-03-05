@@ -1,4 +1,4 @@
-package com.cyril.account.history.presentation.ui
+package com.cyril.account.history.presentation
 
 import android.content.Context
 import android.os.Bundle
@@ -13,8 +13,6 @@ import androidx.navigation.navGraphViewModels
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
 import com.cyril.account.databinding.FragmentHistoryBinding
-import com.cyril.account.history.domain.*
-import com.cyril.account.history.presentation.HistoryViewModel
 import com.cyril.account.start.presentation.StartViewModel
 import dev.chrisbanes.insetter.applyInsetter
 
@@ -71,9 +69,7 @@ class HistoryFragment : Fragment() {
         with(ui.contentHistory.historyRv) { adapter = cardAdp }
 
         histVm.history.observe(viewLifecycleOwner) {
-            cardAdp.submitList(
-                listOf<HistoryType>() + it + Padding
-            )
+            cardAdp.submitList(it)
         }
 
         histVm.setItems()

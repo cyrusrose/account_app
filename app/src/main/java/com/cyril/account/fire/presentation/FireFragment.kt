@@ -1,4 +1,4 @@
-package com.cyril.account.fire.presentation.ui
+package com.cyril.account.fire.presentation
 
 import android.Manifest
 import android.app.Activity
@@ -21,12 +21,11 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
 import com.cyril.account.databinding.FragmentFireBinding
-import com.cyril.account.fire.presentation.FireViewModel
-import com.cyril.account.home.presentation.ui.CardDiffUtil
+import com.cyril.account.home.presentation.CardDiffUtil
 import com.cyril.account.start.presentation.StartViewModel
 import dev.chrisbanes.insetter.applyInsetter
 import java.math.BigDecimal

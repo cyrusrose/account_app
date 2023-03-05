@@ -4,11 +4,10 @@ import android.app.Application
 import android.content.res.Resources
 import android.util.Log
 import androidx.lifecycle.*
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel.*
 import com.cyril.account.R
 import com.cyril.account.core.data.UserRep
-import com.cyril.account.payment.domain.Padding
 import com.cyril.account.payment.domain.Title
 import com.cyril.account.payment.domain.Transfer
 import com.cyril.account.payment.domain.TransferType
@@ -48,8 +47,7 @@ class PaymentViewModel(val app: Application) : AndroidViewModel(app) {
         Title(app.resources.getString(R.string.transfers_title)) +
         getTransfers() +
         Title(app.resources.getString(R.string.payment_title)) +
-        it +
-        Padding
+        it
     }
         .asLiveData()
 

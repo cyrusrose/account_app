@@ -1,4 +1,4 @@
-package com.cyril.account.fire.presentation.ui
+package com.cyril.account.fire.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,35 +13,32 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
-import com.cyril.account.databinding.FragmentAccountsBinding
-import com.cyril.account.fire.presentation.FireViewModel
-import com.cyril.account.home.presentation.ui.CardDiffUtil
+import com.cyril.account.databinding.FragmentFirePaymentBinding
+import com.cyril.account.home.presentation.CardDiffUtil
 import com.cyril.account.start.presentation.StartViewModel
 import dev.chrisbanes.insetter.applyInsetter
 import java.math.BigDecimal
 import java.util.*
 
-
-class FireAccountsFragment : Fragment() {
+class FirePaymentFragment : Fragment() {
     private val fireVm: FireViewModel by viewModels()
     private val mainVm: MainViewModel by activityViewModels()
     private val startVm: StartViewModel by navGraphViewModels(R.id.navigation_start)
 
-    private lateinit var ui: FragmentAccountsBinding
-    private val args: FireAccountsFragmentArgs by navArgs()
+    private lateinit var ui: FragmentFirePaymentBinding
+    private val args: FirePaymentFragmentArgs by navArgs()
 
-    private lateinit var adpFrom: MyCardRecyclerViewAdapter
-    private lateinit var adpTo: MyCardRecyclerViewAdapter
+    private lateinit var adp: MyCardRecyclerViewAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        ui = FragmentAccountsBinding.inflate(inflater, container, false)
+        ui = FragmentFirePaymentBinding.inflate(inflater, container, false)
         return ui.root
     }
 
@@ -53,9 +50,7 @@ class FireAccountsFragment : Fragment() {
                 fireVm.setUser(it)
         }
 
-        adpFrom = MyCardRecyclerViewAdapter(ui.content.fromRv, CardDiffUtil())
-        adpTo = MyCardRecyclerViewAdapter(ui.content.toRv, CardDiffUtil())
-
+        adp = MyCardRecyclerViewAdapter(ui.content.rv, CardDiffUtil())
         setModes()
         displayErrors()
         settingUpNavBar()
@@ -92,41 +87,47 @@ class FireAccountsFragment : Fragment() {
     }
 
     private fun makingTransfer() {
+        ui.content.clientNo.editText
+            ?.setText(args.clientNo.toString())
+
         ui.content.send.setOnClickListener {
             val moneyStr = ui.content.money.editText?.text.toString()
+            val clientNoStr = ui.content.clientNo.editText?.text.toString()
 
-            if (moneyStr.isNotBlank()) {
+            if (moneyStr.isNotBlank() && clientNoStr.isNotBlank()) {
                 try {
                     val money = moneyStr.toBigDecimal()
+                    val clientNo = clientNoStr.toBigInteger()
 
                     if (money < BigDecimal(0.01))
                         ui.content.money.error = getString(R.string.sum_title)
-                    else {
-                        val fromCard = adpFrom.card.value
-                        val toCard = adpTo.card.value
-                        if (fromCard != null && toCard != null) {
-                            fireVm.sendMoney(money, UUID.fromString(fromCard.id), UUID.fromString(toCard.id))
+                    else
+                        adp.card.value?.let {
+                            fireVm.sendMoneyByClientNo(money, UUID.fromString(it.id), clientNo, args.clientSsn)
                         }
-                    }
                 } catch (e: Exception) {
                     mainVm.setUserError(getString(R.string.strings_title))
                 }
             } else {
                 if (moneyStr.isBlank())
                     ui.content.money.error = getString(R.string.not_empty)
+                if (clientNoStr.isBlank())
+                    ui.content.clientNo.error = getString(R.string.not_empty)
             }
-
         }
 
         ui.content.money.editText?.doOnTextChanged { text, _, _, _ ->
             ui.content.money.error = null
         }
+
+        ui.content.clientNo.editText?.doOnTextChanged { text, _, _, _ ->
+            ui.content.clientNo.error = null
+        }
     }
 
     private fun observeCards() {
         fireVm.card.observe(viewLifecycleOwner) {
-            adpFrom.submitList(it)
-            adpTo.submitList(it)
+            adp.submitList(it)
         }
     }
 }

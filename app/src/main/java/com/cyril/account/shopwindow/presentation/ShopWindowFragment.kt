@@ -1,4 +1,4 @@
-package com.cyril.account.shopwindow.presentation.ui
+package com.cyril.account.shopwindow.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,9 +12,8 @@ import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
 import com.cyril.account.databinding.FragmentShopwindowBinding
 import com.cyril.account.home.domain.Card
-import com.cyril.account.home.presentation.ui.CardDiffUtil
-import com.cyril.account.home.presentation.ui.CardRecyclerViewAdapter
-import com.cyril.account.shopwindow.presentation.ShopWindowViewModel
+import com.cyril.account.home.presentation.CardDiffUtil
+import com.cyril.account.home.presentation.CardRecyclerViewAdapter
 import com.cyril.account.start.presentation.StartViewModel
 import dev.chrisbanes.insetter.applyInsetter
 

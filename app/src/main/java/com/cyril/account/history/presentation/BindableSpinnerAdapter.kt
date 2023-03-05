@@ -1,4 +1,4 @@
-package com.cyril.account.history.presentation.ui
+package com.cyril.account.history.presentation
 
 
 import android.content.Context

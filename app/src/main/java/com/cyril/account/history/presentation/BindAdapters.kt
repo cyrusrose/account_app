@@ -1,4 +1,4 @@
-package com.cyril.account.history.presentation.ui
+package com.cyril.account.history.presentation
 
 import android.R
 import android.view.View
@@ -8,7 +8,7 @@ import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
-import com.cyril.account.history.presentation.ui.BindableSpinnerAdapter.SpinnerItem
+import com.cyril.account.history.presentation.BindableSpinnerAdapter.SpinnerItem
 
 @BindingAdapter(value = ["app:spinnerItems", "app:selectedSpinnerItem", "app:selectedSpinnerItemAttrChanged"], requireAll = false)
 fun setSpinnerItems(spinner: Spinner, spinnerItems: List<SpinnerItem>?, selectedSpinnerItem: SpinnerItem?, listener: InverseBindingListener?) {

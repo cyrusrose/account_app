@@ -1,4 +1,4 @@
-package com.cyril.account.payment.presentation.ui
+package com.cyril.account.payment.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,9 +12,9 @@ import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.databinding.FragmentPaymentBinding
 import com.cyril.account.payment.domain.Payment
 import com.cyril.account.payment.domain.Transfer
-import com.cyril.account.payment.presentation.PaymentViewModel
-import com.cyril.account.payment.presentation.ui.TransferRecyclerViewAdapter.TransferListener
+import com.cyril.account.payment.presentation.TransferRecyclerViewAdapter.TransferListener
 import com.cyril.account.utils.sticky.StickyHeaderDecoration
+import dev.chrisbanes.insetter.applyInsetter
 
 class PaymentFragment : Fragment() {
     private val paymentVm: PaymentViewModel by viewModels()
@@ -34,8 +34,17 @@ class PaymentFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setModes()
         displayErrors()
         observeTransfers()
+    }
+
+    private fun setModes() {
+        ui.root.applyInsetter {
+            type(statusBars = true) {
+                padding(top = true)
+            }
+        }
     }
 
     private fun displayErrors() {

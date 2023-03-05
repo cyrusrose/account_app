@@ -1,4 +1,4 @@
-package com.cyril.account.fire.presentation.ui
+package com.cyril.account.fire.presentation
 
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.ListAdapter
 import com.cyril.account.R
 import com.cyril.account.databinding.MyCardItemBinding
 import com.cyril.account.home.domain.Card
-import com.cyril.account.home.presentation.ui.CardDiffUtil
+import com.cyril.account.home.presentation.CardDiffUtil
 
 
 class MyCardRecyclerViewAdapter(rv: RecyclerView, util: CardDiffUtil) : ListAdapter<Card, MyCardRecyclerViewAdapter.ViewHolder>(util) {

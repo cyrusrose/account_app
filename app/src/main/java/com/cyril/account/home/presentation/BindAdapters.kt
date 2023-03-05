@@ -1,4 +1,4 @@
-package com.cyril.account.home.presentation.ui
+package com.cyril.account.home.presentation
 
 import android.content.res.Resources
 import android.view.View

@@ -8,7 +8,7 @@
     <fragment
         app:route="home"
         android:id="@+id/navigation_home"
-        android:name="com.cyril.account.home.presentation.ui.HomeFragment"
+        android:name="com.cyril.account.home.presentation.HomeFragment"
         tools:layout="@layout/fragment_home" >
         <action
             android:id="@+id/action_navigation_home_to_personaFragment"
@@ -17,12 +17,12 @@
 
     <fragment
         android:id="@+id/navigation_shopwindow"
-        android:name="com.cyril.account.shopwindow.presentation.ui.ShopWindowFragment"
+        android:name="com.cyril.account.shopwindow.presentation.ShopWindowFragment"
         tools:layout="@layout/fragment_shopwindow" />
 
     <fragment
         android:id="@+id/navigation_payment"
-        android:name="com.cyril.account.payment.presentation.ui.PaymentFragment"
+        android:name="com.cyril.account.payment.presentation.PaymentFragment"
         tools:layout="@layout/fragment_payment" >
 
         <action
@@ -41,7 +41,7 @@
 
     <fragment
         android:id="@+id/navigation_fire"
-        android:name="com.cyril.account.fire.presentation.ui.FireFragment"
+        android:name="com.cyril.account.fire.presentation.FireFragment"
         tools:layout="@layout/fragment_fire">
         <argument
             android:name="transfer"
@@ -58,12 +58,12 @@
 
     <fragment
         android:id="@+id/navigation_history"
-        android:name="com.cyril.account.history.presentation.ui.HistoryFragment"
+        android:name="com.cyril.account.history.presentation.HistoryFragment"
         tools:layout="@layout/fragment_fire" />
 
     <fragment
         android:id="@+id/navigation_fire_card"
-        android:name="com.cyril.account.fire.presentation.ui.FireCardFragment"
+        android:name="com.cyril.account.fire.presentation.FireCardFragment"
         tools:layout="@layout/fragment_fire_card">
         <argument
             android:name="transfer"
@@ -74,7 +74,7 @@
 
     <fragment
         android:id="@+id/navigation_fire_accounts"
-        android:name="com.cyril.account.fire.presentation.ui.FireAccountsFragment"
+        android:name="com.cyril.account.fire.presentation.FireAccountsFragment"
         tools:layout="@layout/fragment_accounts" >
         <argument
             android:name="transfer"
@@ -85,7 +85,7 @@
 
     <fragment
         android:id="@+id/navigation_fire_payment"
-        android:name="com.cyril.account.fire.presentation.ui.FirePaymentFragment"
+        android:name="com.cyril.account.fire.presentation.FirePaymentFragment"
         tools:layout="@layout/content_fire_payment" >
         <argument
             android:name="transfer"
@@ -103,7 +103,7 @@
     <fragment
         android:id="@+id/navigation_start"
         app:route="start"
-        android:name="com.cyril.account.start.presentation.ui.StartFragment"
+        android:name="com.cyril.account.start.presentation.StartFragment"
         tools:layout="@layout/fragment_start" >
         <action
             android:id="@+id/action_start_to_home"
@@ -134,7 +134,7 @@
         app:destination="@id/navigation_start"/>
     <fragment
         android:id="@+id/personaFragment"
-        android:name="com.cyril.account.home.presentation.ui.PersonaFragment"
+        android:name="com.cyril.account.home.presentation.PersonaFragment"
         android:label="fragment_persona"
         tools:layout="@layout/fragment_persona" />
 </navigation>

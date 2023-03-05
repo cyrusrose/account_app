@@ -1,4 +1,4 @@
-package com.cyril.account.home.presentation.ui
+package com.cyril.account.home.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater

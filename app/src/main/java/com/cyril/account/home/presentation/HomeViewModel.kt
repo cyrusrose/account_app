@@ -3,7 +3,7 @@ package com.cyril.account.home.presentation
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.*
-import com.cyril.account.core.presentation.ui.MainActivity
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel.UserError
 import com.cyril.account.R
 import com.cyril.account.home.data.repository.PersonalRep

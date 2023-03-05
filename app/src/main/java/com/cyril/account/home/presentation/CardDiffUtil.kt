@@ -1,4 +1,4 @@
-package com.cyril.account.home.presentation.ui
+package com.cyril.account.home.presentation
 
 import androidx.recyclerview.widget.DiffUtil
 import com.cyril.account.home.domain.Card
