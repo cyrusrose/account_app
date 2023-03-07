@@ -2,6 +2,7 @@ package com.cyril.account.home.presentation
 
 import android.app.Application
 import android.util.Log
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.*
 import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel.UserError
@@ -11,31 +12,52 @@ import com.cyril.account.home.data.utils.CardTypes
 import com.cyril.account.core.data.response.UserResp
 import com.cyril.account.core.data.response.ClientResp
 import com.cyril.account.home.domain.Card
+import com.cyril.account.utils.cardEmpty
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.net.SocketTimeoutException
 import java.util.*
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
-    val empty = ""
-    private val cardEmpty = listOf(
-        Card(empty, "", "", R.drawable.name_svg, app.resources.getColor(R.color.light_grey))
-    )
+    private val _selectedItem = MutableSharedFlow<Item>()
+
+    private val _selectedCard = MutableStateFlow<Card?>(null)
 
     private val personalRep = PersonalRep()
+
     private val usersState = MutableStateFlow<UserResp?>(null)
     val user: LiveData<UserResp> = usersState.filterNotNull().asLiveData()
+
+    init {
+        _selectedItem.mapLatest { item ->
+            val user = usersState.value
+            val card = _selectedCard.value
+
+            if(user != null && card != null) {
+                Log.d("cyrus", "card: ${card.title}")
+                when (item) {
+                    Item.DEFAULT -> {
+                        Log.d("cyrus", item.name)
+                        changeDefault(user.client, card)
+                    }
+                    Item.DELETE -> delPersonal(user.client, card)
+                    Item.NONE -> Unit
+                }
+            }
+        }
+        .launchIn(viewModelScope)
+    }
 
     private val _error = MutableLiveData<UserError>()
     val error: LiveData<UserError> = _error
 
     val card = usersState.flatMapLatest {
-       if (it == null) {
-           flow {
-               emit(CardTypes(cardEmpty, cardEmpty, cardEmpty))
-           }
-       } else
+       if (it == null)
+           flowOf(CardTypes(cardEmpty, cardEmpty, cardEmpty))
+       else
             personalRep.getPersonalsToCards(it.client, cardEmpty)
             .retry {
                 val time = it is SocketTimeoutException
@@ -52,9 +74,27 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     }
         .asLiveData()
 
+    fun setCard(card: Card) {
+        _selectedCard.update {
+            card
+        }
+    }
+
+    fun setItem(item: Item) {
+        viewModelScope.launch {
+            _selectedItem.emit(item)
+        }
+    }
+
     fun setUser(user: UserResp) {
         val mUser = usersState.value
-        if (user.id != mUser?.id)
+        if (mUser == null)
+            usersState.value = user
+        else if (
+            user.id != mUser.id ||
+            (user.id == mUser.id &&
+                    user.client.defaultAccount?.id != mUser.client.defaultAccount?.id)
+        )
             usersState.value = user
     }
 
@@ -92,3 +132,5 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 }
+
+data class SelectedCard(val user: UserResp, val card: Card)

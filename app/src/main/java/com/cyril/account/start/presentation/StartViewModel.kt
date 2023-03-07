@@ -14,7 +14,13 @@ import java.net.SocketTimeoutException
 
 class StartViewModel(private val app: Application) : AndroidViewModel(app) {
     private data class UserInput(val login: String, val password: String)
-    
+
+    override fun onCleared() {
+        super.onCleared()
+
+        Log.d("cyrus", "StartViewModel cleared")
+    }
+
     private val userRep = UserRep()
     private val usersState = MutableStateFlow<UserInput?>(null)
 

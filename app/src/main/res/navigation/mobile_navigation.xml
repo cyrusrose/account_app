@@ -13,12 +13,21 @@
         <action
             android:id="@+id/action_navigation_home_to_personaFragment"
             app:destination="@id/personaFragment" />
+        <action
+                android:id="@+id/action_navigation_home_to_homeBottomSheet"
+                app:destination="@id/homeBottomSheet" />
     </fragment>
+
+
 
     <fragment
         android:id="@+id/navigation_shopwindow"
         android:name="com.cyril.account.shopwindow.presentation.ShopWindowFragment"
-        tools:layout="@layout/fragment_shopwindow" />
+        tools:layout="@layout/fragment_shopwindow" >
+        <action
+                android:id="@+id/action_navigation_shopwindow_to_shopBottomSheet"
+                app:destination="@id/shopBottomSheet" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_payment"
@@ -132,9 +141,22 @@
 
     <action android:id="@+id/global_navigation_start"
         app:destination="@id/navigation_start"/>
+
     <fragment
         android:id="@+id/personaFragment"
         android:name="com.cyril.account.home.presentation.PersonaFragment"
         android:label="fragment_persona"
         tools:layout="@layout/fragment_persona" />
+
+    <dialog
+        tools:layout="@layout/home_card_sheet"
+        android:id="@+id/homeBottomSheet"
+        android:name="com.cyril.account.home.presentation.HomeBottomSheet"
+        android:label="HomeBottomSheet" />
+
+    <dialog
+        tools:layout="@layout/shop_card_sheet"
+        android:id="@+id/shopBottomSheet"
+        android:name="com.cyril.account.shopwindow.presentation.ShopBottomSheet"
+        android:label="ShopBottomSheet" />
 </navigation>

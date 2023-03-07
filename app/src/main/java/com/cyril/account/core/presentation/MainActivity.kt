@@ -3,10 +3,10 @@ package com.cyril.account.core.presentation
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.*
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import com.cyril.account.R
@@ -17,15 +17,14 @@ import dev.chrisbanes.insetter.applyInsetter
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var mainViewModel: MainViewModel
-    private lateinit var ui: ActivityMainBinding
+    private val mainViewModel: MainViewModel by viewModels()
+    private val ui: ActivityMainBinding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        ui = ActivityMainBinding.inflate(layoutInflater)
         setContentView(ui.root)
-        mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
         setModes()
         settingUpNavView()

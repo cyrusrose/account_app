@@ -13,15 +13,19 @@ import androidx.navigation.navGraphViewModels
 import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
+import com.cyril.account.core.data.response.ClientResp
 import com.cyril.account.databinding.FragmentHomeBinding
 import com.cyril.account.home.domain.Card
 import com.cyril.account.start.presentation.StartViewModel
+import com.it.access.util.collectLatestLifecycleFlow
 import dev.chrisbanes.insetter.applyInsetter
+import kotlinx.coroutines.flow.filter
+import java.util.*
 
 class HomeFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
     private val startViewModel: StartViewModel by navGraphViewModels(R.id.navigation_start)
-    private val homeViewModel: HomeViewModel by viewModels()
+    private val homeViewModel: HomeViewModel by navGraphViewModels(R.id.navigation_home)
 
     private lateinit var ui: FragmentHomeBinding
 
@@ -108,8 +112,15 @@ class HomeFragment : Fragment() {
         startViewModel.getUser().observe(viewLifecycleOwner) { user ->
             if (user != null) {
                 val list = { card: Card ->
-                    val sheet = HomeBottomSheet(user.client, card)
-                    sheet.show(parentFragmentManager, HomeBottomSheet.TAG)
+                    homeViewModel.setCard(card)
+
+                    findNavController().apply {
+                        if (currentDestination?.id == R.id.navigation_home) {
+                            val act = HomeFragmentDirections.actionNavigationHomeToHomeBottomSheet()
+                            navigate(act)
+                        }
+                    }
+                    Unit
                 }
 
                 cardAdp.setCardListener(list)

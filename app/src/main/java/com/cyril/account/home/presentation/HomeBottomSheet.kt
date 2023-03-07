@@ -1,20 +1,23 @@
 package com.cyril.account.home.presentation
 
+import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
+import com.cyril.account.R
 import com.cyril.account.databinding.HomeCardSheetBinding
-import com.cyril.account.core.data.response.ClientResp
-import com.cyril.account.home.presentation.HomeViewModel
-import com.cyril.account.home.domain.Card
+import com.cyril.account.core.presentation.MainViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.snackbar.Snackbar
 
-class HomeBottomSheet(val client: ClientResp, val card: Card) : BottomSheetDialogFragment() {
+class HomeBottomSheet : BottomSheetDialogFragment() {
     private lateinit var ui: HomeCardSheetBinding
-    private val vm: HomeViewModel by viewModels()
+    private val vm: HomeViewModel by navGraphViewModels(R.id.navigation_home)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,19 +34,20 @@ class HomeBottomSheet(val client: ClientResp, val card: Card) : BottomSheetDialo
         setOnClicks()
     }
 
-    private fun displayError(it: String) {
-        val snack = Snackbar.make(ui.root, it, Snackbar.LENGTH_SHORT)
-        snack.show()
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+
+        Log.d("cyrus", "dismissed")
     }
 
     private fun setOnClicks() {
         ui.def.setOnClickListener {
-            vm.changeDefault(client, card)
+            vm.setItem(Item.DEFAULT)
             dismiss()
         }
 
         ui.del.setOnClickListener {
-            vm.delPersonal(client, card)
+            vm.setItem(Item.DELETE)
             dismiss()
         }
     }
@@ -51,4 +55,8 @@ class HomeBottomSheet(val client: ClientResp, val card: Card) : BottomSheetDialo
     companion object {
         const val TAG = "HomeBottomSheet"
     }
+}
+
+enum class Item {
+    DEFAULT, DELETE, NONE
 }

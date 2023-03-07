@@ -21,9 +21,8 @@ import java.net.SocketTimeoutException
 import java.util.*
 
 class FireViewModel(private val app: Application) : AndroidViewModel(app) {
-    val empty = ""
     private val cardEmpty = listOf(
-        Card(empty, "", "", R.drawable.name_svg, app.resources.getColor(R.color.light_grey))
+        Card("", "", "", R.drawable.name_svg, 0x919191)
     )
 
     private val usersState = MutableStateFlow<UserResp?>(null)

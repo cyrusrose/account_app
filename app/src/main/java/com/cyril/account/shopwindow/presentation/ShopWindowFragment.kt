@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
@@ -14,13 +15,17 @@ import com.cyril.account.databinding.FragmentShopwindowBinding
 import com.cyril.account.home.domain.Card
 import com.cyril.account.home.presentation.CardDiffUtil
 import com.cyril.account.home.presentation.CardRecyclerViewAdapter
+import com.cyril.account.home.presentation.HomeFragmentDirections
 import com.cyril.account.start.presentation.StartViewModel
+import com.it.access.util.collectLatestLifecycleFlow
 import dev.chrisbanes.insetter.applyInsetter
+import kotlinx.coroutines.flow.filter
 
 class ShopWindowFragment : Fragment() {
     private val mainVm: MainViewModel by activityViewModels()
     private val startVm: StartViewModel by navGraphViewModels(R.id.navigation_start)
     private val shopVm: ShopWindowViewModel by viewModels()
+    private val sheetVm: ShopSheetViewModel by navGraphViewModels(R.id.navigation_shopwindow)
 
     private lateinit var ui: FragmentShopwindowBinding
 
@@ -39,8 +44,10 @@ class ShopWindowFragment : Fragment() {
         mainVm.navigateToHome()
 
         startVm.getUser().observe(viewLifecycleOwner) {
-            if (it != null)
+            if (it != null) {
                 shopVm.setUser(it)
+                sheetVm.setUser(it)
+            }
         }
 
         setModes()
@@ -78,17 +85,20 @@ class ShopWindowFragment : Fragment() {
             clientAccAdp.submitList(it.clientAccs)
         }
 
-        startVm.getUser().observe(viewLifecycleOwner) { user ->
-            if (user != null) {
-                val list = { card: Card ->
-                    val sheet = ShopBottomSheet(user, card)
-                    sheet.show(parentFragmentManager, ShopBottomSheet.TAG)
-                }
+        val list = { card: Card ->
+            sheetVm.setCard(card)
 
-                cardAdp.setCardListener(list)
-                depAdp.setCardListener(list)
-                clientAccAdp.setCardListener(list)
+            findNavController().apply {
+                if (currentDestination?.id == R.id.navigation_shopwindow) {
+                    val act = ShopWindowFragmentDirections.actionNavigationShopwindowToShopBottomSheet()
+                    navigate(act)
+                }
             }
+            Unit
         }
+
+        cardAdp.setCardListener(list)
+        depAdp.setCardListener(list)
+        clientAccAdp.setCardListener(list)
     }
 }
