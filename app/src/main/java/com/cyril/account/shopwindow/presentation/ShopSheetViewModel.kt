@@ -7,13 +7,12 @@ import androidx.lifecycle.*
 import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
-import com.cyril.account.home.data.utils.CardTypes
 import com.cyril.account.home.data.repository.PersonalRep
 import com.cyril.account.core.data.response.UserResp
-import com.cyril.account.history.presentation.BindableSpinnerAdapter.SpinnerItem
+import com.cyril.account.core.presentation.BindableSpinnerAdapter.SpinnerItem
 import com.cyril.account.home.domain.Card
-import com.cyril.account.utils.Resource
-import com.cyril.account.utils.Resource.Loading
+import com.cyril.account.utils.USD
+import com.cyril.account.utils.UiText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -32,9 +31,17 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
     private val personalRep = PersonalRep()
     private val usersState = MutableStateFlow<UserResp?>(null)
 
-    private val _currencies = MutableLiveData<List<SpinnerItem>>()
-    val currencies: LiveData<List<SpinnerItem>> = _currencies
-    val selectedCurrency = MutableLiveData<SpinnerItem>()
+    val currencies = flow {
+        emit(
+            personalRep.getCurrenciesToCards(app.resources, _error)
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
+
+    val selectedCurrency = MutableStateFlow<SpinnerItem?>(null)
 
     private val _selectedCard = MutableStateFlow<Card?>(null)
     val selectedCard = _selectedCard.asStateFlow()
@@ -59,6 +66,24 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
     }
         .asLiveData()
 
+    val helperText = combine(
+        selectedCurrency.filterNotNull(),
+        _selectedCard.filterNotNull()
+    ) { curr, card ->
+        val minSum = card.minAmount?.let {
+            convert(USD, curr.value.toInt(), it)
+            ?.setScale(2)
+        }
+
+        minSum?.let {
+            UiText.StringResource(R.string.min_sum_code_title, minSum, curr.text)
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
+
     fun setUser(user: UserResp) {
         val mUser = usersState.value
         if (user.id != mUser?.id)
@@ -71,11 +96,11 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun setItems() {
-        viewModelScope.launch {
-            _currencies.value = personalRep.getCurrenciesToCards(app.resources, _error)
-        }
-    }
+//    fun setItems() {
+//        viewModelScope.launch {
+//            _currencies.value = personalRep.getCurrenciesToCards(app.resources, _error)
+//        }
+//    }
 
     suspend fun convert(
         fromCode: Int,

@@ -4,9 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <variable
-            name="vm"
-            type="com.cyril.account.history.presentation.HistoryViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -31,8 +28,6 @@
                 <Spinner
                     android:layout_gravity="end|center_vertical"
                     android:id="@+id/spinner"
-                    app:spinnerItems="@{vm.items}"
-                    app:selectedSpinnerItem="@={vm.selectedItem}"
                     android:layout_width="140dp"
                     android:layout_height="match_parent" />
 

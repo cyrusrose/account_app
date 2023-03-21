@@ -6,7 +6,7 @@ import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.R
 import com.cyril.account.core.data.RetrofitClient
 import com.cyril.account.history.domain.History
-import com.cyril.account.history.presentation.BindableSpinnerAdapter
+import com.cyril.account.core.presentation.BindableSpinnerAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*

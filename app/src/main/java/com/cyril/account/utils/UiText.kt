@@ -15,12 +15,12 @@ sealed class UiText {
             is DynamicString -> value
             is StringResource -> context.getString(
                 id,
-                args.map {
+                *args.map {
                     if (it is UiText)
                         it.asString(context)
                     else
                         it
-                }
+                }.toTypedArray()
             )
         }
 }

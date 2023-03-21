@@ -11,7 +11,7 @@ import com.cyril.account.core.data.RetrofitClient
 import com.cyril.account.home.data.api.PersonalApi
 import com.cyril.account.home.data.utils.CardTypes
 import com.cyril.account.core.data.response.ClientResp
-import com.cyril.account.history.presentation.BindableSpinnerAdapter
+import com.cyril.account.core.presentation.BindableSpinnerAdapter
 import com.cyril.account.home.data.response.*
 import com.cyril.account.home.domain.Card
 import kotlinx.coroutines.*

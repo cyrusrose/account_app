@@ -6,14 +6,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemSelectedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.navGraphViewModels
+import androidx.recyclerview.widget.RecyclerView
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
+import com.cyril.account.core.presentation.BindableSpinnerAdapter
 import com.cyril.account.databinding.FragmentHistoryBinding
 import com.cyril.account.start.presentation.StartViewModel
+import com.it.access.util.collectLatestLifecycleFlow
 import dev.chrisbanes.insetter.applyInsetter
 
 class HistoryFragment : Fragment() {
@@ -29,8 +34,6 @@ class HistoryFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         ui = FragmentHistoryBinding.inflate(inflater, container, false)
-        ui.lifecycleOwner = viewLifecycleOwner
-        ui.vm = histVm
         return ui.root
     }
 
@@ -76,6 +79,28 @@ class HistoryFragment : Fragment() {
     }
 
     private fun searchText() {
+        val adapter = BindableSpinnerAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, mutableListOf())
+        ui.spinner.adapter = adapter
+
+        histVm.items.observe(viewLifecycleOwner) {
+            adapter.clear()
+            adapter.addAll(it)
+
+            histVm.selectedItem.value?.let {
+                val pos = adapter.getPosition(it.text)
+                if (pos != RecyclerView.NO_POSITION)
+                    ui.spinner.setSelection(pos)
+            }
+        }
+
+        ui.spinner.onItemSelectedListener = object: OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                histVm.selectedItem.value = histVm.items.value?.get(p2)
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) = Unit
+        }
+
         ui.search.setStartIconOnClickListener {
             histVm.selectedItem.value?.let { state ->
                 val via = ui.search.editText?.text.toString().ifBlank { null }

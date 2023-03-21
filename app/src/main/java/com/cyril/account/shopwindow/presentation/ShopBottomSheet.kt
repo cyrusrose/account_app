@@ -1,22 +1,23 @@
 package com.cyril.account.shopwindow.presentation
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.viewModels
+import android.widget.AdapterView
 import androidx.navigation.navGraphViewModels
+import androidx.recyclerview.widget.RecyclerView
 import com.cyril.account.R
+import com.cyril.account.core.presentation.BindableSpinnerAdapter
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.databinding.ShopCardSheetBinding
-import com.cyril.account.core.data.response.UserResp
 import com.cyril.account.fire.presentation.MyCardRecyclerViewAdapter
-import com.cyril.account.home.domain.Card
 import com.cyril.account.home.presentation.CardDiffUtil
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.it.access.util.collectLatestLifecycleFlow
+import kotlinx.coroutines.flow.filterNotNull
 
 class ShopBottomSheet : BottomSheetDialogFragment() {
     private val shopVm: ShopSheetViewModel by navGraphViewModels(R.id.navigation_shopwindow)
@@ -32,8 +33,6 @@ class ShopBottomSheet : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View {
         ui = ShopCardSheetBinding.inflate(inflater,  container, false)
-        ui.lifecycleOwner = viewLifecycleOwner
-        ui.vm = shopVm
         return ui.root
     }
 
@@ -99,22 +98,36 @@ class ShopBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun observeCurrency() {
-//        shopVm.setItems()
+        val adapter = BindableSpinnerAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, mutableListOf())
+        ui.spinner.adapter = adapter
 
-//        shopVm.selectedCurrency.observe(viewLifecycleOwner) { item ->
-//            viewLifecycleOwner.lifecycleScope.launch {
-//                acc.minAmount?.let {
-//                    val minSum = it.let {
-//                        shopVm.convert(USD, item.value.toInt(), it)
-//                        ?.setScale(2)
-//                    }
-//                    ui.money.helperText =
-//                        resources.getString(R.string.min_sum_code_title, minSum, item.text)
-//                }
-//
-//                ui.money.error = null
-//            }
-//        }
+        viewLifecycleOwner.collectLatestLifecycleFlow(
+            shopVm.currencies.filterNotNull()
+        ) {
+            adapter.clear()
+            adapter.addAll(it)
+
+            shopVm.selectedCurrency.value?.let {
+                val pos = adapter.getPosition(it.text)
+                if (pos != RecyclerView.NO_POSITION)
+                    ui.spinner.setSelection(pos)
+            }
+        }
+
+        ui.spinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                shopVm.selectedCurrency.value = shopVm.currencies.value?.get(p2)
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) = Unit
+        }
+
+        viewLifecycleOwner.collectLatestLifecycleFlow(
+            shopVm.helperText.filterNotNull()
+        ) {
+            ui.money.helperText = it.asString(requireContext())
+            ui.money.error = null
+        }
     }
 
     private fun observeCards() {
@@ -125,6 +138,5 @@ class ShopBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
         const val TAG = "ShopBottomSheet"
-        const val USD = 840
     }
 }

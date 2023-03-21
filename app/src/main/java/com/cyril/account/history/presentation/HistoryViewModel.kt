@@ -8,7 +8,7 @@ import com.cyril.account.core.presentation.MainViewModel.UserError
 import com.cyril.account.R
 import com.cyril.account.history.data.HistoryRep
 import com.cyril.account.core.data.response.UserResp
-import com.cyril.account.history.presentation.BindableSpinnerAdapter.SpinnerItem
+import com.cyril.account.core.presentation.BindableSpinnerAdapter.SpinnerItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

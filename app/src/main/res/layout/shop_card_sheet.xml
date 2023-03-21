@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <variable
-            name="vm"
-            type="com.cyril.account.shopwindow.presentation.ShopSheetViewModel"/>
     </data>
 
+    <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:paddingBottom="32dp"
@@ -74,9 +74,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toStartOf="@+id/end"
             app:layout_constraintStart_toStartOf="@+id/start"
-            app:layout_constraintTop_toBottomOf="@+id/money"
-            app:selectedSpinnerItem="@={vm.selectedCurrency}"
-            app:spinnerItems="@{vm.currencies}" />
+            app:layout_constraintTop_toBottomOf="@+id/money" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/start"
@@ -92,4 +90,5 @@
             android:orientation="vertical"
             app:layout_constraintGuide_end="16dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 </layout>
