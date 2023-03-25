@@ -116,7 +116,9 @@ class ShopBottomSheet : BottomSheetDialogFragment() {
 
         ui.spinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                shopVm.selectedCurrency.value = shopVm.currencies.value?.get(p2)
+                shopVm.currencies.value?.get(p2)?.let {
+                    shopVm.setCurrency(it)
+                }
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) = Unit

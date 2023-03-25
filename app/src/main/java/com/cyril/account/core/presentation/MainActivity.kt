@@ -13,9 +13,10 @@ import com.cyril.account.R
 import com.cyril.account.databinding.ActivityMainBinding
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 
-
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val mainViewModel: MainViewModel by viewModels()
     private val ui: ActivityMainBinding by lazy {

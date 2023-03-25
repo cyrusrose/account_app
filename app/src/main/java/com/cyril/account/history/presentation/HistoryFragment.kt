@@ -9,20 +9,23 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.RecyclerView
-import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
 import com.cyril.account.core.presentation.BindableSpinnerAdapter
 import com.cyril.account.databinding.FragmentHistoryBinding
 import com.cyril.account.start.presentation.StartViewModel
+import com.cyril.account.utils.UiText
+import com.google.android.material.snackbar.Snackbar
 import com.it.access.util.collectLatestLifecycleFlow
+import com.it.access.util.collectLifecycleFlow
+import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
+import kotlinx.coroutines.flow.filterNotNull
 
+@AndroidEntryPoint
 class HistoryFragment : Fragment() {
-    private val mainVm: MainViewModel by activityViewModels()
     private val startVm: StartViewModel by navGraphViewModels(R.id.navigation_start)
     private val histVm: HistoryViewModel by viewModels()
 
@@ -52,8 +55,11 @@ class HistoryFragment : Fragment() {
     }
 
     private fun displayErrors() {
-        histVm.error.observe(viewLifecycleOwner) {
-            mainVm.setUserError(it)
+        viewLifecycleOwner.collectLifecycleFlow(histVm.error) {
+            if(it is UiText.StringResource) {
+                val snack = Snackbar.make(ui.root, it.asString(requireContext()), Snackbar.LENGTH_SHORT)
+                snack.show()
+            }
         }
     }
 
@@ -67,22 +73,24 @@ class HistoryFragment : Fragment() {
     }
 
     private fun observeHistory() {
-        val cardAdp = HistoryRecyclerViewAdapter(HistoryDiffUtil())
+        val cardAdp = HistoryRecyclerViewAdapter(requireContext(), HistoryDiffUtil())
 
         with(ui.contentHistory.historyRv) { adapter = cardAdp }
 
-        histVm.history.observe(viewLifecycleOwner) {
+        viewLifecycleOwner.collectLatestLifecycleFlow(histVm.history) {
             cardAdp.submitList(it)
         }
-
-        histVm.setItems()
     }
 
     private fun searchText() {
         val adapter = BindableSpinnerAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, mutableListOf())
         ui.spinner.adapter = adapter
 
-        histVm.items.observe(viewLifecycleOwner) {
+        histVm.initItems(resources)
+
+        viewLifecycleOwner.collectLatestLifecycleFlow(
+            histVm.items.filterNotNull()
+        ) {
             adapter.clear()
             adapter.addAll(it)
 
@@ -95,7 +103,9 @@ class HistoryFragment : Fragment() {
 
         ui.spinner.onItemSelectedListener = object: OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                histVm.selectedItem.value = histVm.items.value?.get(p2)
+                histVm.items.value?.get(p2)?.let {
+                    histVm.setItem(it)
+                }
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) = Unit

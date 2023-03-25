@@ -11,7 +11,9 @@ import com.cyril.account.core.data.RetrofitClient
 import com.cyril.account.history.data.HistoryRep
 import com.cyril.account.home.data.repository.PersonalRep
 import com.cyril.account.core.data.response.UserResp
+import com.cyril.account.history.data.HistoryApi
 import com.cyril.account.home.domain.Card
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -31,7 +33,7 @@ class FireViewModel(private val app: Application) : AndroidViewModel(app) {
     private val _error = MutableLiveData<MainViewModel.UserError>()
     val error: LiveData<MainViewModel.UserError> = _error
 
-    private val histRep = HistoryRep()
+    private val histRep = HistoryRep(RetrofitClient.get().create(HistoryApi::class.java), Dispatchers.Default)
     private val personalRep = PersonalRep()
 
     val card = usersState.flatMapLatest {

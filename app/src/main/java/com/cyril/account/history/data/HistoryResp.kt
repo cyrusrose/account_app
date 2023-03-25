@@ -27,11 +27,4 @@ data class HistoryResp(
     override fun toString(): String {
         return mapper.writeValueAsString(this)
     }
-
-//    companion object {
-//        const val both = "both"
-//        const val to = "to"
-//        const val from = "from"
-//        const val change = "change"
-//    }
 }

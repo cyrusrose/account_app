@@ -41,7 +41,8 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
         initialValue = null
     )
 
-    val selectedCurrency = MutableStateFlow<SpinnerItem?>(null)
+    private val _selectedCurrency = MutableStateFlow<SpinnerItem?>(null)
+    val selectedCurrency = _selectedCurrency.asStateFlow()
 
     private val _selectedCard = MutableStateFlow<Card?>(null)
     val selectedCard = _selectedCard.asStateFlow()
@@ -67,7 +68,7 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
         .asLiveData()
 
     val helperText = combine(
-        selectedCurrency.filterNotNull(),
+        _selectedCurrency.filterNotNull(),
         _selectedCard.filterNotNull()
     ) { curr, card ->
         val minSum = card.minAmount?.let {
@@ -83,6 +84,12 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = null
     )
+
+    fun setCurrency(currency: SpinnerItem) {
+        _selectedCurrency.update {
+            currency
+        }
+    }
 
     fun setUser(user: UserResp) {
         val mUser = usersState.value
@@ -114,7 +121,7 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             try {
                 val client = usersState.value?.client
-                val code = selectedCurrency.value?.value
+                val code = _selectedCurrency.value?.value
                 if (client != null && code != null) {
                     val it = personalRep.addCard(
                         clientId = client.id,

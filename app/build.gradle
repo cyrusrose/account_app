@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-    def nav_version = "2.4.2"
+    def nav_version = "2.5.3"
     def lc_version = "2.4.1"
     def jakson_version = "2.14.1"
     def retrofit_version = "2.9.0"

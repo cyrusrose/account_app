@@ -1,5 +1,6 @@
 package com.cyril.account.history.presentation
 
+import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -8,6 +9,7 @@ import com.cyril.account.databinding.HistoryItemBinding
 import com.cyril.account.history.domain.History
 
 class HistoryRecyclerViewAdapter(
+    private val context: Context,
     util: HistoryDiffUtil
 ): ListAdapter<History, RecyclerView.ViewHolder>(util) {
     private var ls: HistoryListener? = null
@@ -17,7 +19,7 @@ class HistoryRecyclerViewAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return ViewHolder.from(parent, ls)
+        return ViewHolder.from(parent, context, ls)
     }
 
 
@@ -32,14 +34,16 @@ class HistoryRecyclerViewAdapter(
     }
 
     class ViewHolder private constructor(
-        val ui: HistoryItemBinding, private val ls: HistoryListener?
+        val ui: HistoryItemBinding,
+        private val context: Context,
+        private val ls: HistoryListener?
     ): RecyclerView.ViewHolder(ui.root) {
         fun bind(item: History) {
             with(ui) {
                 historyNameTitle.text = item.title
                 historyMoney.text = item.money
                 time.text = item.time
-                historyContent.text = item.content
+                historyContent.text = item.content.asString(context)
             }
 
             ui.root.setOnClickListener {
@@ -48,9 +52,10 @@ class HistoryRecyclerViewAdapter(
         }
 
         companion object {
-            fun from(parent: ViewGroup, ls: HistoryListener?): ViewHolder {
+            fun from(parent: ViewGroup, context: Context, ls: HistoryListener?): ViewHolder {
                 return ViewHolder(
                     HistoryItemBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+                    context,
                     ls
                 )
             }
