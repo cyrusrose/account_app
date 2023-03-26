@@ -1,31 +1,33 @@
 package com.cyril.account.home.presentation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
-import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
-import com.cyril.account.core.data.response.ClientResp
 import com.cyril.account.databinding.FragmentHomeBinding
 import com.cyril.account.home.domain.Card
 import com.cyril.account.start.presentation.StartViewModel
+import com.cyril.account.utils.DEBUG
+import com.cyril.account.utils.UiText
+import com.google.android.material.snackbar.Snackbar
 import com.it.access.util.collectLatestLifecycleFlow
+import com.it.access.util.collectLifecycleFlow
+import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
-import kotlinx.coroutines.flow.filter
-import java.util.*
+import kotlinx.coroutines.flow.filterNotNull
 
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
-    private val mainViewModel: MainViewModel by activityViewModels()
-    private val startViewModel: StartViewModel by navGraphViewModels(R.id.navigation_start)
-    private val homeViewModel: HomeViewModel by navGraphViewModels(R.id.navigation_home)
+    private val mainVm: MainViewModel by activityViewModels()
+    private val startVm: StartViewModel by navGraphViewModels(R.id.navigation_start)
+    private val homeVm: HomeViewModel by hiltNavGraphViewModels(R.id.navigation_home)
 
     private lateinit var ui: FragmentHomeBinding
 
@@ -41,11 +43,12 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mainViewModel.navigateToHome()
+        mainVm.navigateToHome()
 
-        startViewModel.getUser().observe(viewLifecycleOwner) {
-            if (it != null)
-                homeViewModel.setUser(it)
+        viewLifecycleOwner.collectLatestLifecycleFlow(
+            startVm.curUser.filterNotNull()
+        ) {
+            homeVm.setUser(it)
         }
 
         setModes()
@@ -65,8 +68,11 @@ class HomeFragment : Fragment() {
 
 
     private fun displayErrors() {
-        homeViewModel.error.observe(viewLifecycleOwner) {
-            mainViewModel.setUserError(it)
+        viewLifecycleOwner.collectLifecycleFlow(homeVm.error) {
+            if(it is UiText.StringResource) {
+                val snack = Snackbar.make(ui.root, it.asString(requireContext()), Snackbar.LENGTH_SHORT)
+                snack.show()
+            }
         }
     }
 
@@ -74,9 +80,7 @@ class HomeFragment : Fragment() {
         ui.logout.setOnClickListener {
             val act = HomeFragmentDirections.globalNavigationStart(getString(R.string.bie_title))
             findNavController().navigate(act)
-            Log.d(MainActivity.DEBUG, "BIE")
-
-            mainViewModel.navigateToStart()
+            mainVm.navigateToStart()
         }
 
         ui.profile.setOnClickListener {
@@ -103,31 +107,29 @@ class HomeFragment : Fragment() {
             isNestedScrollingEnabled = false
         }
 
-        homeViewModel.card.observe(viewLifecycleOwner) {
+        viewLifecycleOwner.collectLatestLifecycleFlow(
+            homeVm.card.filterNotNull()
+        ) {
             cardAdp.submitList(it.cards)
             depAdp.submitList(it.deposits)
             clientAccAdp.submitList(it.clientAccs)
         }
 
-        startViewModel.getUser().observe(viewLifecycleOwner) { user ->
-            if (user != null) {
-                val list = { card: Card ->
-                    homeViewModel.setCard(card)
+        val list = { card: Card ->
+            homeVm.setCard(card)
 
-                    findNavController().apply {
-                        if (currentDestination?.id == R.id.navigation_home) {
-                            val act = HomeFragmentDirections.actionNavigationHomeToHomeBottomSheet()
-                            navigate(act)
-                        }
-                    }
-                    Unit
+            findNavController().apply {
+                if (currentDestination?.id == R.id.navigation_home) {
+                    val act = HomeFragmentDirections.actionNavigationHomeToHomeBottomSheet()
+                    navigate(act)
                 }
-
-                cardAdp.setCardListener(list)
-                depAdp.setCardListener(list)
-                clientAccAdp.setCardListener(list)
             }
+            Unit
         }
+
+        cardAdp.setCardListener(list)
+        depAdp.setCardListener(list)
+        clientAccAdp.setCardListener(list)
     }
 
 }

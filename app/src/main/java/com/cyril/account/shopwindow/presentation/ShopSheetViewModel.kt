@@ -7,12 +7,17 @@ import androidx.lifecycle.*
 import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
+import com.cyril.account.core.data.RetrofitClient
 import com.cyril.account.home.data.repository.PersonalRep
 import com.cyril.account.core.data.response.UserResp
 import com.cyril.account.core.presentation.BindableSpinnerAdapter.SpinnerItem
+import com.cyril.account.home.data.api.PersonalApi
 import com.cyril.account.home.domain.Card
+import com.cyril.account.utils.Resource
 import com.cyril.account.utils.USD
 import com.cyril.account.utils.UiText
+import com.cyril.account.utils.cardEmpty
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -21,20 +26,21 @@ import java.net.SocketTimeoutException
 import java.util.*
 
 class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
-    private val cardEmpty = listOf(
-        Card("", "", "", R.drawable.name_svg, "#919191".toColorInt())
-    )
-
     private val _error = MutableLiveData<MainViewModel.UserError>()
     val error: LiveData<MainViewModel.UserError> = _error
 
-    private val personalRep = PersonalRep()
+    private val personalRep = PersonalRep(RetrofitClient.get().create(PersonalApi::class.java), Dispatchers.Main)
     private val usersState = MutableStateFlow<UserResp?>(null)
 
     val currencies = flow {
-        emit(
-            personalRep.getCurrenciesToCards(app.resources, _error)
-        )
+        personalRep.getCurrenciesToCards().let {
+            when(it) {
+                is Resource.Success -> emit(it.data)
+                else -> {
+
+                }
+            }
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -51,7 +57,7 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
         if (it == null)
             flowOf(cardEmpty)
         else
-            personalRep.getPersonalsToCardsFlat(it.client, cardEmpty)
+            personalRep.getPersonalsToCardsFlat(it.client)
                 .retry {
                     val time = it is SocketTimeoutException
                     if (time) {
@@ -114,7 +120,7 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
         toCode: Int,
         sum: BigDecimal
     ): BigDecimal? {
-        return personalRep.convert(fromCode, toCode, sum, app.resources, _error)
+        return personalRep.convert(fromCode, toCode, sum).data
     }
 
     fun addCard(acc: Card, selectedCard: Card, money: BigDecimal? = null) {

@@ -1,7 +1,7 @@
-package com.cyril.account.history.di
+package com.cyril.account.home.di
 
-import com.cyril.account.history.data.HistoryApi
-import com.cyril.account.history.data.HistoryRep
+import com.cyril.account.home.data.api.PersonalApi
+import com.cyril.account.home.data.repository.PersonalRep
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,10 +15,10 @@ import retrofit2.Retrofit
 class VMModule {
     @ViewModelScoped
     @Provides
-    fun provideHistApi(client: Retrofit) =
-        client.create(HistoryApi::class.java)
+    fun providePersonalApi(client: Retrofit) =
+        client.create(PersonalApi::class.java)
 
     @ViewModelScoped
     @Provides
-    fun provideHistoryRep(histApi: HistoryApi) = HistoryRep(histApi, Dispatchers.Main)
+    fun providePersonalRep(personalApi: PersonalApi) = PersonalRep(personalApi, Dispatchers.Main)
 }

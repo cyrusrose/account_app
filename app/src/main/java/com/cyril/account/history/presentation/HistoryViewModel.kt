@@ -70,7 +70,11 @@ class HistoryViewModel @Inject constructor(
             _error.emit(UiText.StringResource(R.string.working_error))
             Log.d(DEBUG, "Caught: ${e.message}")
         }
-    }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
 
     fun setUser(user: UserResp) {
         if (user.id != usersState.value?.user?.id)

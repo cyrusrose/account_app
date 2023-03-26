@@ -6,10 +6,13 @@ import androidx.lifecycle.*
 import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
+import com.cyril.account.core.data.RetrofitClient
 import com.cyril.account.home.data.utils.CardTypes
 import com.cyril.account.home.data.repository.PersonalRep
 import com.cyril.account.core.data.response.UserResp
+import com.cyril.account.home.data.api.PersonalApi
 import com.cyril.account.utils.cardEmpty
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import java.net.SocketTimeoutException
@@ -18,7 +21,7 @@ class ShopWindowViewModel(private val app: Application) : AndroidViewModel(app) 
     private val _error = MutableLiveData<MainViewModel.UserError>()
     val error: LiveData<MainViewModel.UserError> = _error
 
-    private val personalRep = PersonalRep()
+    private val personalRep = PersonalRep(RetrofitClient.get().create(PersonalApi::class.java), Dispatchers.Main)
     private val usersState = MutableStateFlow<UserResp?>(null)
 
     val accs = usersState.flatMapLatest {
@@ -27,7 +30,7 @@ class ShopWindowViewModel(private val app: Application) : AndroidViewModel(app) 
                 emit(CardTypes(cardEmpty, cardEmpty, cardEmpty))
             }
         } else
-            personalRep.getAccountsToCards(app.resources, cardEmpty)
+            personalRep.getAccountsToCards()
                 .retry {
                     val time = it is SocketTimeoutException
                     if (time) {

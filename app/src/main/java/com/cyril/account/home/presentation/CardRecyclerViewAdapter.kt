@@ -1,5 +1,6 @@
 package com.cyril.account.home.presentation
 
+import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -8,7 +9,7 @@ import com.cyril.account.databinding.CardItemBinding
 import com.cyril.account.home.domain.Card
 
 
-class CardRecyclerViewAdapter(util: CardDiffUtil) : ListAdapter<Card, CardRecyclerViewAdapter.ViewHolder>(util) {
+class CardRecyclerViewAdapter(util: CardDiffUtil, private val context: Context? = null) : ListAdapter<Card, CardRecyclerViewAdapter.ViewHolder>(util) {
     private var ls: CardListener? = null
 
     fun setCardListener (p: CardListener) {
@@ -29,12 +30,18 @@ class CardRecyclerViewAdapter(util: CardDiffUtil) : ListAdapter<Card, CardRecycl
     }
 
     class ViewHolder private constructor(
-        private val ui: CardItemBinding, private val ls: CardListener?
+        private val ui: CardItemBinding, private val ls: CardListener?,
+        private val context: Context? = null
     ) : RecyclerView.ViewHolder(ui.root) {
         fun bind(item: Card) {
             with(ui) {
                 cardNameTitle.text = item.title
-                cardContent.text = item.content
+                if(item.content.isNotBlank())
+                    cardContent.text = item.content
+                else if(item.contentList != null && context != null)
+                    cardContent.text = item.contentList.joinToString(separator = " ") {
+                        it.asString(context)
+                    }
                 cardBackground.setBackgroundColor(item.color)
                 cardImage.setImageResource(item.imageId)
             }
@@ -45,10 +52,11 @@ class CardRecyclerViewAdapter(util: CardDiffUtil) : ListAdapter<Card, CardRecycl
         }
 
         companion object {
-            fun from(parent: ViewGroup, ls: CardListener?): ViewHolder {
+            fun from(parent: ViewGroup, ls: CardListener?, context: Context? = null): ViewHolder {
                 return ViewHolder(
                     CardItemBinding.inflate(LayoutInflater.from(parent.context), parent, false),
-                    ls
+                    ls,
+                    context
                 )
             }
         }

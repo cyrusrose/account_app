@@ -12,7 +12,9 @@ import com.cyril.account.history.data.HistoryRep
 import com.cyril.account.home.data.repository.PersonalRep
 import com.cyril.account.core.data.response.UserResp
 import com.cyril.account.history.data.HistoryApi
+import com.cyril.account.home.data.api.PersonalApi
 import com.cyril.account.home.domain.Card
+import com.cyril.account.utils.cardEmpty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -23,10 +25,6 @@ import java.net.SocketTimeoutException
 import java.util.*
 
 class FireViewModel(private val app: Application) : AndroidViewModel(app) {
-    private val cardEmpty = listOf(
-        Card("", "", "", R.drawable.name_svg, 0x919191)
-    )
-
     private val usersState = MutableStateFlow<UserResp?>(null)
     val user: LiveData<UserResp> = usersState.filterNotNull().asLiveData()
 
@@ -34,7 +32,7 @@ class FireViewModel(private val app: Application) : AndroidViewModel(app) {
     val error: LiveData<MainViewModel.UserError> = _error
 
     private val histRep = HistoryRep(RetrofitClient.get().create(HistoryApi::class.java), Dispatchers.Default)
-    private val personalRep = PersonalRep()
+    private val personalRep = PersonalRep(RetrofitClient.get().create(PersonalApi::class.java), Dispatchers.Main)
 
     val card = usersState.flatMapLatest {
         if (it == null) {
@@ -42,7 +40,7 @@ class FireViewModel(private val app: Application) : AndroidViewModel(app) {
                 emit(cardEmpty)
             }
         } else
-            personalRep.getPersonalsToCardsFlat(it.client, cardEmpty)
+            personalRep.getPersonalsToCardsFlat(it.client)
                 .retry {
                     val time = it is SocketTimeoutException
                     if (time) {

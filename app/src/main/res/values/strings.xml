@@ -59,8 +59,11 @@
     <string name="bie_title">Bie!</string>
     <string name="same_error">It\'s the same account</string>
     <string name="sending_error">Error during sending money</string>
+    <string name="deleting_accs_error">Error during closing an account</string>
     <string name="working_error">Unscheduled work on the server</string>
+    <string name="changing_error">Error during changing a default account</string>
     <string name="trying_error">Trying again...</string>
+    <string name="already_default_error">It\'s already default</string>
     <string name="interest_title">Interest rate: %s</string>
     <string name="min_sum_title">Min sum: %s</string>
     <string name="months_title">Months: %s</string>

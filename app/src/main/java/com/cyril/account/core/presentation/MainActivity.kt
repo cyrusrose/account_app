@@ -1,6 +1,7 @@
 package com.cyril.account.core.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.viewModels
@@ -9,6 +10,9 @@ import androidx.core.os.bundleOf
 import androidx.core.view.*
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.onNavDestinationSelected
+import androidx.navigation.ui.setupWithNavController
 import com.cyril.account.R
 import com.cyril.account.databinding.ActivityMainBinding
 import com.google.android.material.color.MaterialColors
@@ -56,8 +60,10 @@ class MainActivity : AppCompatActivity() {
     private fun settingUpNavView() {
         val nc = findNavController(R.id.nav_host_fragment_activity_main)
 
+//        ui.navView.setupWithNavController(nc)
         ui.navView.setOnItemSelectedListener {
-            val options = NavOptions.Builder()
+            it.onNavDestinationSelected(nc)
+                    val options = NavOptions.Builder()
                 .setPopUpTo(R.id.navigation_home, false, true)
                 .setLaunchSingleTop(true)
                 .setRestoreState(true)
@@ -74,6 +80,8 @@ class MainActivity : AppCompatActivity() {
             .map { it.itemId }.toList()
 
         nc.addOnDestinationChangedListener { nc, dest, args ->
+            Log.d(com.cyril.account.utils.DEBUG, nc.currentDestination?.displayName ?: "name")
+
             if (dest.id != R.id.navigation_start) {
                 val color = MaterialColors.getColor(ui.navView, R.attr.colorSurface)
                 window.navigationBarColor = color
@@ -86,7 +94,6 @@ class MainActivity : AppCompatActivity() {
                 val item = ui.navView.menu.findItem(dest.id)
                 item.isChecked = true
             }
-//            if (dest.id !in listOf(R.id.navigation_payment))
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         }
     }

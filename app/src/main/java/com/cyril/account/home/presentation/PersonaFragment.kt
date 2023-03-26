@@ -13,30 +13,26 @@ import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.R
 import com.cyril.account.databinding.FragmentPersonaBinding
 import com.cyril.account.start.presentation.StartViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class PersonaFragment : Fragment() {
     private lateinit var ui: FragmentPersonaBinding
-    private val startViewModel: StartViewModel by navGraphViewModels(R.id.navigation_start)
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
+    private val startVm: StartViewModel by navGraphViewModels(R.id.navigation_start)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         ui = FragmentPersonaBinding.inflate(inflater, container, false)
         ui.contentPersona.lifecycleOwner = viewLifecycleOwner
-        ui.contentPersona.vm = startViewModel
+        ui.contentPersona.vm = startVm
         return ui.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        observeUser()
         settingUpNavBar()
     }
 
@@ -49,12 +45,4 @@ class PersonaFragment : Fragment() {
         ui.fireTb.setupWithNavController(nc, conf)
         ui.fireTb.title = null
     }
-
-    private fun observeUser() {
-        startViewModel.getUser().observe(viewLifecycleOwner) {
-            if (it == null)
-                HomeFragmentDirections.globalNavigationStart("User has logged out")
-        }
-    }
-
 }

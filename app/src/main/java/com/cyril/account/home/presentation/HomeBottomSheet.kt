@@ -6,18 +6,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import com.cyril.account.R
 import com.cyril.account.databinding.HomeCardSheetBinding
-import com.cyril.account.core.presentation.MainViewModel
+import com.cyril.account.utils.DEBUG
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class HomeBottomSheet : BottomSheetDialogFragment() {
     private lateinit var ui: HomeCardSheetBinding
-    private val vm: HomeViewModel by navGraphViewModels(R.id.navigation_home)
+    private val vm: HomeViewModel by hiltNavGraphViewModels(R.id.navigation_home)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,7 +36,7 @@ class HomeBottomSheet : BottomSheetDialogFragment() {
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
 
-        Log.d("cyrus", "dismissed")
+        Log.d(DEBUG, "HomeBottomSheet dismissed")
     }
 
     private fun setOnClicks() {

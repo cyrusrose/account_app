@@ -43,9 +43,10 @@ class HistoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        startVm.getUser().observe(viewLifecycleOwner) {
-            if (it != null)
-                histVm.setUser(it)
+        viewLifecycleOwner.collectLatestLifecycleFlow(
+            startVm.curUser.filterNotNull()
+        ) {
+            histVm.setUser(it)
         }
 
         setModes()

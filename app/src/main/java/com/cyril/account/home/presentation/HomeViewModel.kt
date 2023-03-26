@@ -12,24 +12,28 @@ import com.cyril.account.home.data.utils.CardTypes
 import com.cyril.account.core.data.response.UserResp
 import com.cyril.account.core.data.response.ClientResp
 import com.cyril.account.home.domain.Card
+import com.cyril.account.utils.DEBUG
+import com.cyril.account.utils.UiText
 import com.cyril.account.utils.cardEmpty
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.net.SocketTimeoutException
 import java.util.*
+import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val personalRep: PersonalRep
+) : ViewModel() {
     private val _selectedItem = MutableSharedFlow<Item>()
 
     private val _selectedCard = MutableStateFlow<Card?>(null)
 
-    private val personalRep = PersonalRep()
-
     private val usersState = MutableStateFlow<UserResp?>(null)
-    val user: LiveData<UserResp> = usersState.filterNotNull().asLiveData()
 
     init {
         _selectedItem.mapLatest { item ->
@@ -37,12 +41,9 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
             val card = _selectedCard.value
 
             if(user != null && card != null) {
-                Log.d("cyrus", "card: ${card.title}")
+                Log.d(DEBUG, "card: ${card.title}")
                 when (item) {
-                    Item.DEFAULT -> {
-                        Log.d("cyrus", item.name)
-                        changeDefault(user.client, card)
-                    }
+                    Item.DEFAULT -> changeDefault(user.client, card)
                     Item.DELETE -> delPersonal(user.client, card)
                     Item.NONE -> Unit
                 }
@@ -51,28 +52,31 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
         .launchIn(viewModelScope)
     }
 
-    private val _error = MutableLiveData<UserError>()
-    val error: LiveData<UserError> = _error
+    private val _error = MutableSharedFlow<UiText>()
+    val error = _error.asSharedFlow()
 
     val card = usersState.flatMapLatest {
        if (it == null)
            flowOf(CardTypes(cardEmpty, cardEmpty, cardEmpty))
        else
-            personalRep.getPersonalsToCards(it.client, cardEmpty)
+            personalRep.getPersonalsToCards(it.client)
             .retry {
                 val time = it is SocketTimeoutException
                 if (time) {
                     delay(5000)
-                    _error.value = UserError(app.resources.getString(R.string.trying_error))
-                    Log.d(MainActivity.DEBUG, it.message ?: "")
+                    _error.emit(UiText.StringResource(R.string.trying_error))
+                    Log.d(DEBUG, it.message ?: "")
                 }
                 time
             }.catch { e ->
-                _error.value = UserError(app.resources.getString(R.string.working_error))
-                Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
+                _error.emit(UiText.StringResource(R.string.working_error))
+                Log.d(DEBUG, "Caught: ${e.message}")
             }
-    }
-        .asLiveData()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
 
     fun setCard(card: Card) {
         _selectedCard.update {
@@ -89,13 +93,13 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     fun setUser(user: UserResp) {
         val mUser = usersState.value
         if (mUser == null)
-            usersState.value = user
+            usersState.update { user }
         else if (
             user.id != mUser.id ||
             (user.id == mUser.id &&
-                    user.client.defaultAccount?.id != mUser.client.defaultAccount?.id)
+            user.client.defaultAccount?.id != mUser.client.defaultAccount?.id)
         )
-            usersState.value = user
+            usersState.update { user }
     }
 
     fun delPersonal(client: ClientResp, card: Card) {
@@ -103,12 +107,12 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
             try {
                 val it = personalRep.delPersonal(client.id, UUID.fromString(card.id))
                 if (!it.isSuccessful) {
-                    Log.d(MainActivity.DEBUG, it.errorBody()?.string() ?: "Unknown")
-                    _error.value = UserError("Error during deleting account")
+                    Log.d(DEBUG, it.errorBody()?.string() ?: "Unknown")
+                    _error.emit(UiText.StringResource(R.string.deleting_accs_error))
                 }
             } catch (e: Exception) {
-                Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
-                _error.value = UserError("Unscheduled work on the server")
+                Log.d(DEBUG, "Caught: ${e.message}")
+                _error.emit(UiText.StringResource(R.string.working_error))
             }
         }
     }
@@ -116,21 +120,18 @@ class HomeViewModel(private val app: Application) : AndroidViewModel(app) {
     fun changeDefault(client: ClientResp, card: Card) {
         viewModelScope.launch {
             if (client.defaultAccount?.id != UUID.fromString(card.id))
-                    try {
-                        val it = personalRep.changeDefault(client.id, UUID.fromString(card.id))
-                        if (!it.isSuccessful) {
-                            Log.d(MainActivity.DEBUG, it.errorBody()?.string() ?: "Unknown")
-                            _error.value = UserError("Error during changing account")
-                        }
-                    } catch (e: Exception) {
-                        _error.value = UserError("Unscheduled work on the server")
-                        Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
+                try {
+                    val it = personalRep.changeDefault(client.id, UUID.fromString(card.id))
+                    if (!it.isSuccessful) {
+                        Log.d(MainActivity.DEBUG, it.errorBody()?.string() ?: "Unknown")
+                        _error.emit(UiText.StringResource(R.string.changing_error))
                     }
-            else {
-                _error.value = UserError("It's already default")
-            }
+                } catch (e: Exception) {
+                    _error.emit(UiText.StringResource(R.string.working_error))
+                    Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
+                }
+            else
+                _error.emit(UiText.StringResource(R.string.already_default_error))
         }
     }
 }
-
-data class SelectedCard(val user: UserResp, val card: Card)

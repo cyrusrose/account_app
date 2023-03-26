@@ -54,6 +54,9 @@
     <string name="bie_title">Пока!</string>
     <string name="same_error">Один и тотже счет</string>
     <string name="sending_error">Ошибка перевода средств</string>
+    <string name="deleting_accs_error">Ошибка закрытия счетов</string>
+    <string name="changing_error">Ошибка смены аккаунта по умолчанию</string>
+    <string name="already_default_error">Уже выбрана по умолчанию</string>
     <string name="working_error">Внеплановые работы на сервере</string>
     <string name="trying_error">Пытаемся сново...</string>
     <string name="interest_title" formatted="true">Ставка процента: %s</string>

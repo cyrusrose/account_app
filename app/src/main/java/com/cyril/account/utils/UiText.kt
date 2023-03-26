@@ -5,7 +5,9 @@ import androidx.annotation.StringRes
 import com.cyril.account.history.presentation.HistoryViewModel
 
 sealed class UiText {
-    data class DynamicString(val value: String) : UiText()
+    data class DynamicString(val value: String) : UiText() {
+        fun asString() = value
+    }
     class StringResource(
         @StringRes val id: Int,
         vararg val args: Any

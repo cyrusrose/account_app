@@ -27,7 +27,7 @@ class StartViewModel(private val app: Application) : AndroidViewModel(app) {
     private val _userError = MutableLiveData<UserError>()
     val userError: LiveData<UserError> = _userError
 
-    private val users = usersState.filterNotNull().flatMapLatest {
+    val curUser = usersState.filterNotNull().flatMapLatest {
         userRep.getUser(it.login, it.password)
         .retry {
             val time = it is SocketTimeoutException
@@ -42,18 +42,24 @@ class StartViewModel(private val app: Application) : AndroidViewModel(app) {
             Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
             usersState.value = null
         }
-    }
-        .asLiveData()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
+
+    private val usersOld =  curUser.asLiveData()
+
 
     fun getUser(login: String, password: String, subscribe: Boolean = false): LiveData<UserResp?> {
         if (login.isNotBlank() && password.isNotBlank())
             usersState.value = UserInput(login, password)
         else
             usersState.value = null
-        return users
+        return usersOld
     }
 
     fun getUser(): LiveData<UserResp?> {
-        return users
+        return usersOld
     }
 }
