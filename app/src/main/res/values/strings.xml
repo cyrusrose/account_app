@@ -30,6 +30,7 @@
     <string name="contact_name_title">Receiver</string>
     <string name="receiver_name_title">Receiver: %s</string>
     <string name="login_title">Login</string>
+    <string name="login_error">Login error</string>
     <string name="password_title">Password</string>
     <string name="enter_title">Enter</string>
     <string name="failed_to_sign_in">Failed to sign in</string>

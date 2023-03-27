@@ -10,6 +10,7 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.RecyclerView
 import com.cyril.account.R
@@ -26,7 +27,7 @@ import kotlinx.coroutines.flow.filterNotNull
 
 @AndroidEntryPoint
 class HistoryFragment : Fragment() {
-    private val startVm: StartViewModel by navGraphViewModels(R.id.navigation_start)
+    private val startVm: StartViewModel by hiltNavGraphViewModels(R.id.navigation_start)
     private val histVm: HistoryViewModel by viewModels()
 
     private lateinit var ui: FragmentHistoryBinding
@@ -57,10 +58,8 @@ class HistoryFragment : Fragment() {
 
     private fun displayErrors() {
         viewLifecycleOwner.collectLifecycleFlow(histVm.error) {
-            if(it is UiText.StringResource) {
-                val snack = Snackbar.make(ui.root, it.asString(requireContext()), Snackbar.LENGTH_SHORT)
-                snack.show()
-            }
+            val snack = Snackbar.make(ui.root, it.asString(requireContext()), Snackbar.LENGTH_SHORT)
+            snack.show()
         }
     }
 

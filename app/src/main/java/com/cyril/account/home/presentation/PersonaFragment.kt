@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import androidx.navigation.ui.AppBarConfiguration
@@ -18,7 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class PersonaFragment : Fragment() {
     private lateinit var ui: FragmentPersonaBinding
-    private val startVm: StartViewModel by navGraphViewModels(R.id.navigation_start)
+    private val startVm: StartViewModel by hiltNavGraphViewModels(R.id.navigation_start)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

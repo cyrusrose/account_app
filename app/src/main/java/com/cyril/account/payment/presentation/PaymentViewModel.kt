@@ -7,6 +7,8 @@ import androidx.lifecycle.*
 import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel.*
 import com.cyril.account.R
+import com.cyril.account.core.data.RetrofitClient
+import com.cyril.account.core.data.UserApi
 import com.cyril.account.core.data.UserRep
 import com.cyril.account.payment.domain.Title
 import com.cyril.account.payment.domain.Transfer
@@ -19,7 +21,7 @@ class PaymentViewModel(val app: Application) : AndroidViewModel(app) {
     private val _error = MutableLiveData<UserError>()
     val error: LiveData<UserError> = _error
 
-    private val userRep = UserRep()
+    private val userRep = UserRep(RetrofitClient.get().create(UserApi::class.java), Dispatchers.IO)
 
     private suspend fun getTransfers(): List<Transfer> {
         val res = viewModelScope.async(Dispatchers.IO) {

@@ -9,18 +9,19 @@ import com.cyril.account.payment.domain.Payment
 import com.cyril.account.payment.domain.Transfer
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.BufferedInputStream
 import java.lang.reflect.Type
 import java.net.HttpURLConnection
 import java.util.*
 
-class UserRep {
-    val userApi: UserApi = RetrofitClient.get().create(UserApi::class.java)
+class UserRep(
+    private val userApi: UserApi,
+    private val dispatcher: CoroutineDispatcher
+) {
 
-    suspend fun getTransfers(config: Configuration, res: AssetManager): List<Transfer> {
+    suspend fun getTransfers(config: Configuration, res: AssetManager) = coroutineScope {
         val gson = Gson()
         var sc: BufferedInputStream? = null
         val type: Type = object : TypeToken<List<Transfer>>() { }.type
@@ -31,15 +32,20 @@ class UserRep {
                 else -> "en/transfers.json"
             }
 
-            sc = BufferedInputStream(res.open(file))
-            val jsonString = sc.readBytes().toString(Charsets.UTF_8)
-            return gson.fromJson(jsonString, type)
-        } catch (e: Exception) { }
-        finally {
-            sc?.close()
-        }
+            with(dispatcher) {
+                sc = BufferedInputStream(res.open(file))
+                val jsonString = sc!!.readBytes().toString(Charsets.UTF_8)
+                gson.fromJson(jsonString, type)
+            }
 
-        return emptyList()
+        } catch (e: Exception) {
+            emptyList<Transfer>()
+        }
+        finally {
+            with(dispatcher) {
+                sc?.close()
+            }
+        }
     }
 
     fun getUser(login: String, password: String, refreshRate: Long = 8000) = flow {
@@ -61,7 +67,6 @@ class UserRep {
             delay(refreshRate)
         }
     }
-        .flowOn(Dispatchers.Default)
         .conflate()
 
     fun getClientNos(ssn: String? = null, refreshRate: Long = 10000) = flow {
@@ -81,7 +86,6 @@ class UserRep {
             delay(refreshRate)
         }
     }
-        .flowOn(Dispatchers.Default)
         .conflate()
 
     fun getClientNosTOCards(ssn: String? = null, refreshRate: Long = 10000) =

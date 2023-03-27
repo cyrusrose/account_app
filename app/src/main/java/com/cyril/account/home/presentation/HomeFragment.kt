@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.filterNotNull
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
     private val mainVm: MainViewModel by activityViewModels()
-    private val startVm: StartViewModel by navGraphViewModels(R.id.navigation_start)
+    private val startVm: StartViewModel by hiltNavGraphViewModels(R.id.navigation_start)
     private val homeVm: HomeViewModel by hiltNavGraphViewModels(R.id.navigation_home)
 
     private lateinit var ui: FragmentHomeBinding
@@ -69,10 +69,8 @@ class HomeFragment : Fragment() {
 
     private fun displayErrors() {
         viewLifecycleOwner.collectLifecycleFlow(homeVm.error) {
-            if(it is UiText.StringResource) {
-                val snack = Snackbar.make(ui.root, it.asString(requireContext()), Snackbar.LENGTH_SHORT)
-                snack.show()
-            }
+            val snack = Snackbar.make(ui.root, it.asString(requireContext()), Snackbar.LENGTH_SHORT)
+            snack.show()
         }
     }
 

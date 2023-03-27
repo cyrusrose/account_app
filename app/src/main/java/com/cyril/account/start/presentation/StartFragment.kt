@@ -1,25 +1,27 @@
 package com.cyril.account.start.presentation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResultListener
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.navigation.navGraphViewModels
-import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
 import com.cyril.account.databinding.FragmentStartBinding
 import com.google.android.material.snackbar.Snackbar
+import com.it.access.util.collectLatestLifecycleFlow
+import com.it.access.util.collectLifecycleFlow
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.filterNotNull
 
+@AndroidEntryPoint
 class StartFragment : Fragment() {
-    private val startViewModel: StartViewModel by navGraphViewModels(R.id.navigation_start)
+    private val startVm: StartViewModel by hiltNavGraphViewModels(R.id.navigation_start)
     private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var ui: FragmentStartBinding
     private val args: StartFragmentArgs by navArgs()
@@ -37,36 +39,33 @@ class StartFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         mainViewModel.navigateToStart()
 
-        setModes()
         login()
         errors()
     }
 
-    private fun setModes() {
-
+    private fun displayError(msg: String) {
+        val snack = Snackbar.make(ui.root, msg, Snackbar.LENGTH_SHORT)
+        snack.show()
     }
 
     private fun errors() {
         args.error?.let {
-            mainViewModel.setUserError(it)
+            startVm.showError(it)
         }
 
-        startViewModel.userError.observe(viewLifecycleOwner) {
-            mainViewModel.setUserError(it)
+        viewLifecycleOwner.collectLifecycleFlow(startVm.error) {
+            displayError(it.asString(requireContext()))
         }
     }
 
     private fun login() {
-
         val nc = findNavController()
 
-        startViewModel.getUser("", "").observe(viewLifecycleOwner) {
-            if (it !== null) {
-                Log.d(MainActivity.DEBUG, "To Sign In")
-                val act = StartFragmentDirections.actionStartToHome()
-                nc.navigate(act)
-            } else
-                Snackbar.make(ui.root, getString(R.string.failed_to_sign_in), Snackbar.LENGTH_SHORT).show()
+        viewLifecycleOwner.collectLatestLifecycleFlow(
+            startVm.curUser.filterNotNull()
+        ) {
+            val act = StartFragmentDirections.actionStartToHome()
+            nc.navigate(act)
         }
 
         ui.enter.setOnClickListener {
@@ -74,7 +73,7 @@ class StartFragment : Fragment() {
             val password = ui.password.editText?.text.toString()
 
             if (login.isNotBlank() && password.isNotBlank()) {
-                startViewModel.getUser(login, password)
+                startVm.getUser(login, password)
             } else {
                 if (login.isBlank())
                     ui.login.error = getString(R.string.not_empty)

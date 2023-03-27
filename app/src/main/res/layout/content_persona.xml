@@ -26,7 +26,7 @@
             app:layout_constraintDimensionRatio="h,8:4"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:personal="@{ vm.user }"
+            app:personal="@{ vm.curUser }"
             app:layout_constraintTop_toTopOf="parent">
 
             <include
@@ -54,7 +54,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
             android:textSize="20sp"
-            app:client_name="@{ vm.user.client }"
+            app:client_name="@{ vm.curUser.client }"
             app:layout_constraintEnd_toStartOf="@+id/guideline5"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintHorizontal_chainStyle="packed"
@@ -80,7 +80,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
             android:textSize="20sp"
-            app:client_phone="@{ vm.user.client }"
+            app:client_phone="@{ vm.curUser.client }"
             app:layout_constraintEnd_toStartOf="@+id/guideline5"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toEndOf="@+id/phone_label"
@@ -91,7 +91,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:visibility="visible"
-            app:client_hide="@{ vm.user.client }"
+            app:client_hide="@{ vm.curUser.client }"
             app:constraint_referenced_ids="phone, phone_label" />
 
         <androidx.constraintlayout.widget.Guideline

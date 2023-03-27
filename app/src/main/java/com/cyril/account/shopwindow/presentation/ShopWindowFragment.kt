@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.cyril.account.core.presentation.MainViewModel
@@ -20,10 +21,11 @@ import com.cyril.account.start.presentation.StartViewModel
 import com.it.access.util.collectLatestLifecycleFlow
 import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 
 class ShopWindowFragment : Fragment() {
     private val mainVm: MainViewModel by activityViewModels()
-    private val startVm: StartViewModel by navGraphViewModels(R.id.navigation_start)
+    private val startVm: StartViewModel by hiltNavGraphViewModels(R.id.navigation_start)
     private val shopVm: ShopWindowViewModel by viewModels()
     private val sheetVm: ShopSheetViewModel by navGraphViewModels(R.id.navigation_shopwindow)
 
@@ -43,11 +45,11 @@ class ShopWindowFragment : Fragment() {
 
         mainVm.navigateToHome()
 
-        startVm.getUser().observe(viewLifecycleOwner) {
-            if (it != null) {
-                shopVm.setUser(it)
-                sheetVm.setUser(it)
-            }
+        viewLifecycleOwner.collectLatestLifecycleFlow(
+            startVm.curUser.filterNotNull()
+        ) {
+            shopVm.setUser(it)
+            sheetVm.setUser(it)
         }
 
         setModes()

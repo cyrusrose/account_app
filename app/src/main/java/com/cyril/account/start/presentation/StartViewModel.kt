@@ -8,39 +8,50 @@ import com.cyril.account.core.presentation.MainViewModel.UserError
 import com.cyril.account.R
 import com.cyril.account.core.data.UserRep
 import com.cyril.account.core.data.response.UserResp
+import com.cyril.account.utils.DEBUG
+import com.cyril.account.utils.UiText
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.net.SocketTimeoutException
+import javax.inject.Inject
 
-class StartViewModel(private val app: Application) : AndroidViewModel(app) {
+@HiltViewModel
+class StartViewModel @Inject constructor(
+    private val userRep: UserRep
+) : ViewModel() {
     private data class UserInput(val login: String, val password: String)
 
     override fun onCleared() {
         super.onCleared()
-
-        Log.d("cyrus", "StartViewModel cleared")
+        Log.d(DEBUG, "StartViewModel cleared")
     }
 
-    private val userRep = UserRep()
     private val usersState = MutableStateFlow<UserInput?>(null)
 
-    private val _userError = MutableLiveData<UserError>()
-    val userError: LiveData<UserError> = _userError
+    private val _error = MutableSharedFlow<UiText>()
+    val error = _error.asSharedFlow()
 
     val curUser = usersState.filterNotNull().flatMapLatest {
-        userRep.getUser(it.login, it.password)
+        userRep.getUser(it.login, it.password).onEach { value ->
+            if (value == null)
+                _error.emit(UiText.StringResource(R.string.login_error))
+        }
         .retry {
             val time = it is SocketTimeoutException
             if (time) {
                 delay(5000)
-                _userError.value = UserError(app.resources.getString(R.string.trying_error))
+                _error.emit(UiText.StringResource(R.string.trying_error))
                 Log.d(MainActivity.DEBUG, it.message ?: "")
             }
             time
         }.catch { e ->
-            _userError.value = UserError(app.resources.getString(R.string.working_error))
+            _error.emit(UiText.StringResource(R.string.working_error))
             Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
-            usersState.value = null
+            usersState.update {
+                null
+            }
         }
     }.stateIn(
         scope = viewModelScope,
@@ -48,18 +59,26 @@ class StartViewModel(private val app: Application) : AndroidViewModel(app) {
         initialValue = null
     )
 
-    private val usersOld =  curUser.asLiveData()
-
-
-    fun getUser(login: String, password: String, subscribe: Boolean = false): LiveData<UserResp?> {
+    fun getUser(login: String, password: String): StateFlow<UserResp?> {
         if (login.isNotBlank() && password.isNotBlank())
-            usersState.value = UserInput(login, password)
-        else
-            usersState.value = null
-        return usersOld
+            usersState.update {
+                UserInput(login, password)
+            }
+        return curUser
     }
 
-    fun getUser(): LiveData<UserResp?> {
-        return usersOld
+    fun resetUser(): StateFlow<UserResp?> {
+        usersState.update {
+            null
+        }
+        return curUser
     }
+
+    fun showError(msg: UiText) {
+        viewModelScope.launch {
+            _error.emit(msg)
+        }
+    }
+
+    fun showError(msg: String) = showError(UiText.DynamicString(msg))
 }
