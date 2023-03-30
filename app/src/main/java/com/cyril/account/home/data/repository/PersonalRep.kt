@@ -18,6 +18,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.math.BigDecimal
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.util.*
 
 class PersonalRep(
@@ -210,22 +211,28 @@ class PersonalRep(
 
     suspend fun getCurrencies() = personalApi.getCurrencies()
 
-    suspend fun getCurrenciesToCards() = coroutineScope {
-        val ans = withContext(dispatcher) {
-            getCurrencies()
-        }
-
-        if (ans.isSuccessful) Resource.Success(buildList {
-            ans.body()?.let {
-                it.forEach {
-                    add(BindableSpinnerAdapter.SpinnerItem(it.code.toString(), it.letterCode))
-                }
+    fun getCurrenciesToCards(refreshRate: Long = 8000) = flow {
+        while(true) {
+            val ans = withContext(dispatcher) {
+                getCurrencies()
             }
-        })
-        else
-            Resource.Error(UiText.StringResource(R.string.codes_error))
 
+            val result = if (ans.isSuccessful && ans.code() == HttpURLConnection.HTTP_OK)
+                Resource.Success(buildList {
+                    ans.body()?.let {
+                        it.forEach {
+                            add(BindableSpinnerAdapter.SpinnerItem(it.code.toString(), it.letterCode))
+                        }
+                    }
+                })
+            else
+                Resource.Error(UiText.StringResource(R.string.codes_error))
+
+            emit(result)
+            delay(refreshRate)
+        }
     }
+    .conflate()
 
     suspend fun convert(
         fromCode: Int,
@@ -236,7 +243,7 @@ class PersonalRep(
             personalApi.convert(fromCode, toCode, sum)
         }
 
-        if (ans.isSuccessful)
+        if (ans.isSuccessful && ans.code() == HttpURLConnection.HTTP_OK)
             Resource.Success(ans.body())
         else
             Resource.Error(UiText.StringResource(R.string.codes_error))

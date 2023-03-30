@@ -25,6 +25,7 @@
     <string name="contact_name_title">Получатель</string>
     <string name="receiver_name_title">Получатель: %s</string>
     <string name="login_title">Логин</string>
+    <string name="no_min_amout">Нет мин суммы</string>
     <string name="login_error">Ошибка входа</string>
     <string name="password_title">Пароль</string>
     <string name="enter_title">Войти</string>

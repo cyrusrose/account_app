@@ -11,10 +11,14 @@ import com.cyril.account.core.presentation.BindableSpinnerAdapter.SpinnerItem
 import com.cyril.account.history.domain.ToCardsUseCase
 import com.cyril.account.utils.DEBUG
 import com.cyril.account.utils.UiText
+import com.it.access.util.retryAgain
+import com.it.access.util.retryAgainCatch
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import java.net.SocketTimeoutException
 import javax.inject.Inject
 
@@ -41,11 +45,23 @@ class HistoryViewModel @Inject constructor(
     private val _error = MutableSharedFlow<UiText>()
     val error = _error.asSharedFlow()
 
+    private val handler = CoroutineExceptionHandler { _, throwable ->
+        if (throwable !is SocketTimeoutException)
+            viewModelScope.launch {
+                throwable.message?.let {
+                    _error.emit(UiText.DynamicString(it))
+                }
+            }
+        Log.d(DEBUG, "Error: " + throwable.message)
+    }
+
+    private val scope = viewModelScope + handler
+
     private val _items = MutableStateFlow<List<SpinnerItem>?>(null)
     val items = _items.asStateFlow()
 
     fun initItems(res: Resources) {
-        viewModelScope.launch {
+        scope.launch {
             _items.update {
                 historyRep.getTypes(res)
             }
@@ -58,20 +74,9 @@ class HistoryViewModel @Inject constructor(
     val history = usersState.filterNotNull()
     .flatMapLatest {
         toCardsUseCase(it.user.client.id, it.state, it.via)
-        .retry {
-            val time = it is SocketTimeoutException
-            if (time) {
-                delay(5000)
-                _error.emit(UiText.StringResource(R.string.trying_error))
-                Log.d(DEBUG, it.message ?: "")
-            }
-            time
-        }.catch { e ->
-            _error.emit(UiText.StringResource(R.string.working_error))
-            Log.d(DEBUG, "Caught: ${e.message}")
-        }
+        .retryAgainCatch(_error)
     }.stateIn(
-        scope = viewModelScope,
+        scope = scope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = null
     )

@@ -17,7 +17,7 @@ class CardRecyclerViewAdapter(util: CardDiffUtil, private val context: Context? 
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder.from(parent, ls)
+        return ViewHolder.from(parent, ls, context)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

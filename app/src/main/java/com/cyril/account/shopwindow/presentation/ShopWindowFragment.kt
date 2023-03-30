@@ -5,29 +5,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
-import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
 import com.cyril.account.databinding.FragmentShopwindowBinding
 import com.cyril.account.home.domain.Card
 import com.cyril.account.home.presentation.CardDiffUtil
 import com.cyril.account.home.presentation.CardRecyclerViewAdapter
-import com.cyril.account.home.presentation.HomeFragmentDirections
 import com.cyril.account.start.presentation.StartViewModel
+import com.google.android.material.snackbar.Snackbar
 import com.it.access.util.collectLatestLifecycleFlow
+import com.it.access.util.collectLifecycleFlow
+import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 
+@AndroidEntryPoint
 class ShopWindowFragment : Fragment() {
-    private val mainVm: MainViewModel by activityViewModels()
     private val startVm: StartViewModel by hiltNavGraphViewModels(R.id.navigation_start)
     private val shopVm: ShopWindowViewModel by viewModels()
-    private val sheetVm: ShopSheetViewModel by navGraphViewModels(R.id.navigation_shopwindow)
+    private val sheetVm: ShopSheetViewModel by hiltNavGraphViewModels(R.id.navigation_shopwindow)
 
     private lateinit var ui: FragmentShopwindowBinding
 
@@ -42,8 +40,6 @@ class ShopWindowFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        mainVm.navigateToHome()
 
         viewLifecycleOwner.collectLatestLifecycleFlow(
             startVm.curUser.filterNotNull()
@@ -67,21 +63,24 @@ class ShopWindowFragment : Fragment() {
     }
 
     private fun displayErrors() {
-        shopVm.error.observe(viewLifecycleOwner) {
-            mainVm.setUserError(it)
+        viewLifecycleOwner.collectLifecycleFlow(shopVm.error) {
+            val snack = Snackbar.make(ui.root, it.asString(requireContext()), Snackbar.LENGTH_SHORT)
+            snack.show()
         }
     }
 
     private fun observeCards() {
-        val cardAdp = CardRecyclerViewAdapter(CardDiffUtil())
-        val depAdp = CardRecyclerViewAdapter(CardDiffUtil())
-        val clientAccAdp = CardRecyclerViewAdapter(CardDiffUtil())
+        val cardAdp = CardRecyclerViewAdapter(CardDiffUtil(), context)
+        val depAdp = CardRecyclerViewAdapter(CardDiffUtil(), context)
+        val clientAccAdp = CardRecyclerViewAdapter(CardDiffUtil(), context)
 
         with(ui.card) { adapter = cardAdp }
         with(ui.deposit) { adapter = depAdp }
         with(ui.account) { adapter = clientAccAdp }
 
-        shopVm.accs.observe(viewLifecycleOwner) {
+        viewLifecycleOwner.collectLatestLifecycleFlow(
+            shopVm.accs.filterNotNull()
+        ) {
             cardAdp.submitList(it.cards)
             depAdp.submitList(it.deposits)
             clientAccAdp.submitList(it.clientAccs)

@@ -38,6 +38,7 @@
     <string name="choose_it_title">Choose?</string>
     <string name="yes_title">Yes</string>
     <string name="no_title">No</string>
+    <string name="no_min_amout">No min amount</string>
     <string name="delete_title">Delete</string>
     <string name="not_enough_title">Not enough money</string>
     <string name="success_title">Success</string>

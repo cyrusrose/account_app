@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.core.widget.doOnTextChanged
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.RecyclerView
 import com.cyril.account.R
@@ -17,10 +19,13 @@ import com.cyril.account.home.presentation.CardDiffUtil
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.it.access.util.collectLatestLifecycleFlow
+import com.it.access.util.collectLifecycleFlow
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterNotNull
 
+@AndroidEntryPoint
 class ShopBottomSheet : BottomSheetDialogFragment() {
-    private val shopVm: ShopSheetViewModel by navGraphViewModels(R.id.navigation_shopwindow)
+    private val shopVm: ShopSheetViewModel by hiltNavGraphViewModels(R.id.navigation_shopwindow)
 
     private lateinit var ui: ShopCardSheetBinding
     private val adp by lazy {
@@ -41,11 +46,17 @@ class ShopBottomSheet : BottomSheetDialogFragment() {
 
         observeCurrency()
         observeCards()
+        displayErrors()
+        setOnClicks()
     }
 
     private fun displayErrors() {
-        shopVm.error.observe(viewLifecycleOwner) {
-            displayError(it.message)
+        viewLifecycleOwner.collectLifecycleFlow(shopVm.error) {
+            displayError(it.asString(requireContext()))
+        }
+
+        viewLifecycleOwner.collectLifecycleFlow(shopVm.moneyError) {
+            ui.money.error = it.asString(requireContext())
         }
     }
 
@@ -55,46 +66,16 @@ class ShopBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun setOnClicks() {
-//        ui.choose.setOnClickListener {
-//            viewLifecycleOwner.lifecycleScope.launch {
-//                try {
-//                    val card = adp.card.value
-//                    val moneyStr = ui.money.editText?.text.toString()
-//                    val money = moneyStr.ifBlank { "0.0" }.toBigDecimal()
-//                    val curr = shopVm.selectedCurrency.value?.value?.toInt()
-//                    val minAmount = if(curr != null && acc.minAmount != null)
-//                        shopVm.convert(USD, curr, acc.minAmount)?.setScale(2) else null
-//                    if (card != null) {
-//                        if (acc.clss == "client_account") {
-//                            if (minAmount != null) {
-//                                if (money < BigDecimal(0.01)) {
-//                                    ui.money.error = getString(R.string.sum_title)
-//                                }
-//                                else if (money < minAmount)
-//                                    ui.money.error = getString(R.string.sum_less_title, money, minAmount)
-//                                else
-//                                    shopVm.addCard(acc, card, money)
-//                            } else
-//                                displayError("No min amount")
-//                        } else {
-//                            if (money < BigDecimal.ZERO) {
-//                                ui.money.error = getString(R.string.sum_other_title, "0.0")
-//                            } else {
-//                                shopVm.addCard(acc, card, money)
-//                            }
-//                        }
-//                    } else
-//                        displayError(getString(R.string.choose_card_title))
-//
-//                } catch(e: NumberFormatException) {
-//                    displayError(getString(R.string.strings_title))
-//                }
-//            }
-//        }
-//
-//        ui.money.editText?.doOnTextChanged { text, _, _, _ ->
-//            ui.money.error = null
-//        }
+        ui.choose.setOnClickListener click@ {
+            val moneyStr = ui.money.editText?.text.toString()
+            val money = moneyStr.ifBlank { "0.00" }.toBigDecimal()
+
+            shopVm.addCard(money)
+        }
+
+        ui.money.editText?.doOnTextChanged { text, _, _, _ ->
+            ui.money.error = null
+        }
     }
 
     private fun observeCurrency() {
@@ -133,7 +114,13 @@ class ShopBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun observeCards() {
-        shopVm.cards.observe(viewLifecycleOwner) {
+        adp.card.observe(viewLifecycleOwner) {
+            shopVm.setAcc(it)
+        }
+
+        viewLifecycleOwner.collectLifecycleFlow(
+            shopVm.cards.filterNotNull()
+        ) {
             adp.submitList(it)
         }
     }

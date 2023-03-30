@@ -1,48 +1,61 @@
 package com.cyril.account.shopwindow.presentation
 
-import android.app.Application
 import android.util.Log
-import androidx.core.graphics.toColorInt
-import androidx.lifecycle.*
-import com.cyril.account.core.presentation.MainActivity
-import com.cyril.account.core.presentation.MainViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.cyril.account.R
-import com.cyril.account.core.data.RetrofitClient
-import com.cyril.account.home.data.repository.PersonalRep
 import com.cyril.account.core.data.response.UserResp
 import com.cyril.account.core.presentation.BindableSpinnerAdapter.SpinnerItem
-import com.cyril.account.home.data.api.PersonalApi
+import com.cyril.account.home.data.repository.PersonalRep
 import com.cyril.account.home.domain.Card
-import com.cyril.account.utils.Resource
-import com.cyril.account.utils.USD
-import com.cyril.account.utils.UiText
-import com.cyril.account.utils.cardEmpty
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import com.cyril.account.utils.*
+import com.it.access.util.retryAgain
+import com.it.access.util.retryAgainCatch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import java.math.BigDecimal
 import java.net.SocketTimeoutException
 import java.util.*
+import javax.inject.Inject
 
-class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
-    private val _error = MutableLiveData<MainViewModel.UserError>()
-    val error: LiveData<MainViewModel.UserError> = _error
+@HiltViewModel
+class ShopSheetViewModel @Inject constructor(
+    private val personalRep: PersonalRep
+) : ViewModel() {
+    private val _error = MutableSharedFlow<UiText>()
+    val error = _error.asSharedFlow()
 
-    private val personalRep = PersonalRep(RetrofitClient.get().create(PersonalApi::class.java), Dispatchers.Main)
+    private val _moneyError = MutableSharedFlow<UiText>()
+    val moneyError = _moneyError.asSharedFlow()
+
     private val usersState = MutableStateFlow<UserResp?>(null)
 
-    val currencies = flow {
-        personalRep.getCurrenciesToCards().let {
-            when(it) {
-                is Resource.Success -> emit(it.data)
-                else -> {
-
+    private val handler = CoroutineExceptionHandler { _, throwable ->
+        if (throwable !is SocketTimeoutException)
+            viewModelScope.launch {
+                throwable.message?.let {
+                    _error.emit(UiText.DynamicString(it))
                 }
             }
+        Log.d(DEBUG, "Error: " + throwable.message)
+    }
+
+    private val scope = viewModelScope + handler
+
+    val currencies = personalRep.getCurrenciesToCards()
+    .retryAgain(_error)
+    .transform { it ->
+        if (it is Resource.Error) it.message?.let {
+            _error.emit(it)
         }
-    }.stateIn(
-        scope = viewModelScope,
+        if (it is Resource.Success)
+            emit(it.data)
+    }
+    .stateIn(
+        scope = scope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = null
     )
@@ -53,25 +66,20 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
     private val _selectedCard = MutableStateFlow<Card?>(null)
     val selectedCard = _selectedCard.asStateFlow()
 
+    private val _selectedAcc = MutableStateFlow<Card?>(null)
+
     val cards = usersState.flatMapLatest {
         if (it == null)
             flowOf(cardEmpty)
         else
             personalRep.getPersonalsToCardsFlat(it.client)
-                .retry {
-                    val time = it is SocketTimeoutException
-                    if (time) {
-                        delay(5000)
-                        _error.value = MainViewModel.UserError(app.resources.getString(R.string.trying_error))
-                        Log.d(MainActivity.DEBUG, it.message ?: "")
-                    }
-                    time
-                }.catch { e ->
-                    _error.value = MainViewModel.UserError(app.resources.getString(R.string.working_error))
-                    Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
-                }
+            .retryAgainCatch(_error)
     }
-        .asLiveData()
+    .stateIn(
+        scope = scope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
 
     val helperText = combine(
         _selectedCurrency.filterNotNull(),
@@ -85,11 +93,60 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
         minSum?.let {
             UiText.StringResource(R.string.min_sum_code_title, minSum, curr.text)
         }
-    }.stateIn(
-        scope = viewModelScope,
+    }
+    .retryAgain(_error)
+    .stateIn(
+        scope = scope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = null
     )
+
+    private val _money = MutableSharedFlow<MoneyState>()
+
+    init {
+        _money.mapLatest {
+            startAdding(it)
+        }
+        .retryAgain(_error)
+        .launchIn(scope)
+    }
+
+    private suspend fun startAdding(it: MoneyState) {
+        val card = _selectedCard.value
+        if(card == null) {
+            _error.emit(UiText.StringResource(R.string.choose_card_title))
+            return
+        }
+        val curr = _selectedCurrency.value?.value?.toInt()
+        if (curr == null) {
+            _error.emit(UiText.StringResource(R.string.code_error))
+            return
+        }
+
+        if (card.clss == "client_account") {
+            val minAmount = if(card.minAmount != null)
+                convert(USD, curr, card.minAmount)?.setScale(2) else null
+
+            if (minAmount == null) {
+                _error.emit(UiText.StringResource(R.string.no_min_amout))
+                return
+            }
+
+            if (it.money < BigDecimal(0.01)) {
+                _moneyError.emit(UiText.StringResource(R.string.sum_title))
+            }
+            else if (it.money < minAmount)
+                _moneyError.emit(UiText.StringResource(R.string.sum_less_title, it.money, minAmount))
+            else
+                confirmCard(curr, card, it.money)
+        } else {
+            if (it.money > BigDecimal.ZERO && it.money < BigDecimal("0.01")) {
+                _moneyError.emit(UiText.StringResource(R.string.sum_title))
+                return
+            } else
+                confirmCard(curr, card, it.money)
+        }
+    }
 
     fun setCurrency(currency: SpinnerItem) {
         _selectedCurrency.update {
@@ -100,7 +157,9 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
     fun setUser(user: UserResp) {
         val mUser = usersState.value
         if (user.id != mUser?.id)
-            usersState.value = user
+            usersState.update {
+                user
+            }
     }
 
     fun setCard(card: Card) {
@@ -109,47 +168,63 @@ class ShopSheetViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-//    fun setItems() {
-//        viewModelScope.launch {
-//            _currencies.value = personalRep.getCurrenciesToCards(app.resources, _error)
-//        }
-//    }
+    fun setAcc(acc: Card) {
+        _selectedAcc.update {
+            acc
+        }
+    }
 
-    suspend fun convert(
+    private suspend fun convert(
         fromCode: Int,
         toCode: Int,
         sum: BigDecimal
     ): BigDecimal? {
-        return personalRep.convert(fromCode, toCode, sum).data
-    }
-
-    fun addCard(acc: Card, selectedCard: Card, money: BigDecimal? = null) {
-        viewModelScope.launch {
-            try {
-                val client = usersState.value?.client
-                val code = _selectedCurrency.value?.value
-                if (client != null && code != null) {
-                    val it = personalRep.addCard(
-                        clientId = client.id,
-                        accountId = UUID.fromString(acc.id),
-                        code = code.toInt(),
-                        money = money,
-                        senderAccountId = UUID.fromString(selectedCard.id) )
-
-                    if (!it.isSuccessful) {
-                        Log.d(MainActivity.DEBUG, it.errorBody()?.string() ?: "Unknown")
-                        _error.value = MainViewModel.UserError(app.resources.getString(R.string.card_add_error))
-                    }
-                } else {
-                    if (client == null)
-                        _error.value = MainViewModel.UserError(app.resources.getString(R.string.client_error))
-                    else if(code == null)
-                        _error.value = MainViewModel.UserError(app.resources.getString(R.string.code_error))
+        val data = personalRep.convert(fromCode, toCode, sum)
+        return when (data) {
+            is Resource.Success -> data.data
+            else -> {
+                data.message?.let {
+                    _error.emit(it)
                 }
-            } catch (e: Exception) {
-                _error.value = MainViewModel.UserError(app.resources.getString(R.string.working_error))
-                Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
+                null
             }
         }
     }
+
+    fun addCard(money: BigDecimal) {
+        scope.launch {
+           _money.emit(MoneyState(money))
+        }
+    }
+
+    private suspend fun confirmCard(
+        code: Int,
+        selectedCard: Card,
+        money: BigDecimal? = null
+    ) {
+        val client = usersState.value?.client
+        if (client == null ) {
+            _error.emit(UiText.StringResource(R.string.client_error))
+            return
+        }
+        val acc = _selectedAcc.value
+        if (acc == null) {
+            _error.emit(UiText.StringResource(R.string.choose_card_title))
+            return
+        }
+
+        val it = personalRep.addCard(
+            clientId = client.id,
+            accountId = UUID.fromString(selectedCard.id),
+            code = code,
+            money = money,
+            senderAccountId = UUID.fromString(acc.id) )
+
+        if (!it.isSuccessful) {
+            Log.d(DEBUG, it.errorBody()?.string() ?: "Unknown")
+            _error.emit(UiText.StringResource(R.string.card_add_error))
+        }
+    }
 }
+
+data class MoneyState(val money: BigDecimal)

@@ -1,19 +1,20 @@
 package com.cyril.account.start.presentation
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.*
-import com.cyril.account.core.presentation.MainActivity
-import com.cyril.account.core.presentation.MainViewModel.UserError
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.cyril.account.R
 import com.cyril.account.core.data.UserRep
 import com.cyril.account.core.data.response.UserResp
 import com.cyril.account.utils.DEBUG
 import com.cyril.account.utils.UiText
+import com.it.access.util.retryAgain
+import com.it.access.util.retryAgainCatch
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import java.net.SocketTimeoutException
 import javax.inject.Inject
 
@@ -33,28 +34,30 @@ class StartViewModel @Inject constructor(
     private val _error = MutableSharedFlow<UiText>()
     val error = _error.asSharedFlow()
 
+    private val handler = CoroutineExceptionHandler { _, throwable ->
+        if (throwable !is SocketTimeoutException)
+            viewModelScope.launch {
+                throwable.message?.let {
+                    _error.emit(UiText.DynamicString(it))
+                }
+            }
+        Log.d(DEBUG, "Error: " + throwable.message)
+    }
+
+    private val scope = viewModelScope + handler
+
     val curUser = usersState.filterNotNull().flatMapLatest {
         userRep.getUser(it.login, it.password).onEach { value ->
             if (value == null)
                 _error.emit(UiText.StringResource(R.string.login_error))
         }
-        .retry {
-            val time = it is SocketTimeoutException
-            if (time) {
-                delay(5000)
-                _error.emit(UiText.StringResource(R.string.trying_error))
-                Log.d(MainActivity.DEBUG, it.message ?: "")
-            }
-            time
-        }.catch { e ->
-            _error.emit(UiText.StringResource(R.string.working_error))
-            Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
+        .retryAgainCatch(_error) {
             usersState.update {
                 null
             }
         }
     }.stateIn(
-        scope = viewModelScope,
+        scope = scope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = null
     )
@@ -75,7 +78,7 @@ class StartViewModel @Inject constructor(
     }
 
     fun showError(msg: UiText) {
-        viewModelScope.launch {
+        scope.launch {
             _error.emit(msg)
         }
     }

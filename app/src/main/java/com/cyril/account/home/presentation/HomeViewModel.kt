@@ -15,14 +15,15 @@ import com.cyril.account.home.domain.Card
 import com.cyril.account.utils.DEBUG
 import com.cyril.account.utils.UiText
 import com.cyril.account.utils.cardEmpty
+import com.it.access.util.retryAgain
+import com.it.access.util.retryAgainCatch
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.net.SocketTimeoutException
 import java.util.*
 import javax.inject.Inject
+import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -35,12 +36,26 @@ class HomeViewModel @Inject constructor(
 
     private val usersState = MutableStateFlow<UserResp?>(null)
 
+    private val _error = MutableSharedFlow<UiText>()
+    val error = _error.asSharedFlow()
+
+    private val handler = CoroutineExceptionHandler { _, throwable ->
+        viewModelScope.launch {
+            throwable.message?.let {
+                _error.emit(UiText.DynamicString(it))
+            }
+        }
+        Log.d(DEBUG, "Error: " + throwable.message)
+    }
+
+    private val scope = viewModelScope + handler
+
     init {
         _selectedItem.mapLatest { item ->
             val user = usersState.value
             val card = _selectedCard.value
 
-            if(user != null && card != null) {
+            if (user != null && card != null) {
                 Log.d(DEBUG, "card: ${card.title}")
                 when (item) {
                     Item.DEFAULT -> changeDefault(user.client, card)
@@ -49,31 +64,18 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
-        .launchIn(viewModelScope)
+            .retryAgain(_error)
+            .launchIn(scope)
     }
 
-    private val _error = MutableSharedFlow<UiText>()
-    val error = _error.asSharedFlow()
-
     val card = usersState.flatMapLatest {
-       if (it == null)
-           flowOf(CardTypes(cardEmpty, cardEmpty, cardEmpty))
-       else
+        if (it == null)
+            flowOf(CardTypes(cardEmpty, cardEmpty, cardEmpty))
+        else
             personalRep.getPersonalsToCards(it.client)
-            .retry {
-                val time = it is SocketTimeoutException
-                if (time) {
-                    delay(5000)
-                    _error.emit(UiText.StringResource(R.string.trying_error))
-                    Log.d(DEBUG, it.message ?: "")
-                }
-                time
-            }.catch { e ->
-                _error.emit(UiText.StringResource(R.string.working_error))
-                Log.d(DEBUG, "Caught: ${e.message}")
-            }
+            .retryAgainCatch(_error)
     }.stateIn(
-        scope = viewModelScope,
+        scope = scope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = null
     )
@@ -85,7 +87,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun setItem(item: Item) {
-        viewModelScope.launch {
+        scope.launch {
             _selectedItem.emit(item)
         }
     }
@@ -102,36 +104,22 @@ class HomeViewModel @Inject constructor(
             usersState.update { user }
     }
 
-    fun delPersonal(client: ClientResp, card: Card) {
-        viewModelScope.launch {
-            try {
-                val it = personalRep.delPersonal(client.id, UUID.fromString(card.id))
-                if (!it.isSuccessful) {
-                    Log.d(DEBUG, it.errorBody()?.string() ?: "Unknown")
-                    _error.emit(UiText.StringResource(R.string.deleting_accs_error))
-                }
-            } catch (e: Exception) {
-                Log.d(DEBUG, "Caught: ${e.message}")
-                _error.emit(UiText.StringResource(R.string.working_error))
-            }
+    private suspend fun delPersonal(client: ClientResp, card: Card) {
+        val it = personalRep.delPersonal(client.id, UUID.fromString(card.id))
+        if (!it.isSuccessful) {
+            Log.d(DEBUG, it.errorBody()?.string() ?: "Unknown")
+            _error.emit(UiText.StringResource(R.string.deleting_accs_error))
         }
     }
 
-    fun changeDefault(client: ClientResp, card: Card) {
-        viewModelScope.launch {
-            if (client.defaultAccount?.id != UUID.fromString(card.id))
-                try {
-                    val it = personalRep.changeDefault(client.id, UUID.fromString(card.id))
-                    if (!it.isSuccessful) {
-                        Log.d(MainActivity.DEBUG, it.errorBody()?.string() ?: "Unknown")
-                        _error.emit(UiText.StringResource(R.string.changing_error))
-                    }
-                } catch (e: Exception) {
-                    _error.emit(UiText.StringResource(R.string.working_error))
-                    Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
-                }
-            else
-                _error.emit(UiText.StringResource(R.string.already_default_error))
-        }
+    private suspend fun changeDefault(client: ClientResp, card: Card) {
+        if (client.defaultAccount?.id != UUID.fromString(card.id)) {
+            val it = personalRep.changeDefault(client.id, UUID.fromString(card.id))
+            if (!it.isSuccessful) {
+                Log.d(MainActivity.DEBUG, it.errorBody()?.string() ?: "Unknown")
+                _error.emit(UiText.StringResource(R.string.changing_error))
+            }
+        } else
+            _error.emit(UiText.StringResource(R.string.already_default_error))
     }
 }
