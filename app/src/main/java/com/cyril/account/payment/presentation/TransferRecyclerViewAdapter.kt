@@ -1,5 +1,6 @@
 package com.cyril.account.payment.presentation
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
@@ -77,20 +78,22 @@ class TransferRecyclerViewAdapter(util: TransferDiffUtil) : ListAdapter<Transfer
     }
 
     class TitleHolder private constructor(
-        private val ui: TitleItemBinding
+        private val ui: TitleItemBinding,
+        private val context: Context
     ) : ViewHolder(ui.root), StickyHeader {
         override var stickyId: Any = ""
 
         fun bind(item: Title) {
             with(ui) {
-                title.text = item.title
+                title.text = item.title.asString(context)
             }
             stickyId = item.title
         }
 
         companion object {
             fun from(parent: ViewGroup) = TitleHolder(
-                TitleItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                TitleItemBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+                parent.context
             )
         }
     }

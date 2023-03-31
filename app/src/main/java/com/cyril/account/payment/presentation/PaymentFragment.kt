@@ -14,11 +14,16 @@ import com.cyril.account.payment.domain.Payment
 import com.cyril.account.payment.domain.Transfer
 import com.cyril.account.payment.presentation.TransferRecyclerViewAdapter.TransferListener
 import com.cyril.account.utils.sticky.StickyHeaderDecoration
+import com.google.android.material.snackbar.Snackbar
+import com.it.access.util.collectLatestLifecycleFlow
+import com.it.access.util.collectLifecycleFlow
+import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
+import kotlinx.coroutines.flow.filterNotNull
 
+@AndroidEntryPoint
 class PaymentFragment : Fragment() {
     private val paymentVm: PaymentViewModel by viewModels()
-    private val mainVm: MainViewModel by activityViewModels()
 
     private lateinit var ui: FragmentPaymentBinding
 
@@ -48,19 +53,22 @@ class PaymentFragment : Fragment() {
     }
 
     private fun displayErrors() {
-        paymentVm.error.observe(viewLifecycleOwner) {
-            mainVm.setUserError(it)
+        viewLifecycleOwner.collectLifecycleFlow(paymentVm.error) {
+            val snack = Snackbar.make(ui.root, it.asString(requireContext()), Snackbar.LENGTH_SHORT)
+            snack.show()
         }
     }
 
     private fun observeTransfers() {
+        paymentVm.setUpTransfers(requireContext().assets)
         val adp = TransferRecyclerViewAdapter(TransferDiffUtil())
 
-        paymentVm.all.observe(viewLifecycleOwner) {
+        viewLifecycleOwner.collectLatestLifecycleFlow(paymentVm.all.filterNotNull()) {
             adp.submitList(it)
         }
 
         val nc = findNavController()
+
         adp.setTransferListener( object: TransferListener {
             override fun getTransfer(t: Transfer) {
                 val act = when (t.id) {

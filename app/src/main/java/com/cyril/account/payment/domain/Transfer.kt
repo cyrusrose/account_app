@@ -1,5 +1,6 @@
 package com.cyril.account.payment.domain
 
+import com.cyril.account.utils.UiText
 import java.math.BigInteger
 
 sealed interface TransferType
@@ -16,7 +17,7 @@ data class Payment(
     val title: String
 ): TransferType
 
-data class Title(val title: String): TransferType
+data class Title(val title: UiText): TransferType
 
 
 

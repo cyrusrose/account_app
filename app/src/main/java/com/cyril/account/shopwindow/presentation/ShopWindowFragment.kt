@@ -70,9 +70,9 @@ class ShopWindowFragment : Fragment() {
     }
 
     private fun observeCards() {
-        val cardAdp = CardRecyclerViewAdapter(CardDiffUtil(), context)
-        val depAdp = CardRecyclerViewAdapter(CardDiffUtil(), context)
-        val clientAccAdp = CardRecyclerViewAdapter(CardDiffUtil(), context)
+        val cardAdp = CardRecyclerViewAdapter(CardDiffUtil())
+        val depAdp = CardRecyclerViewAdapter(CardDiffUtil())
+        val clientAccAdp = CardRecyclerViewAdapter(CardDiffUtil())
 
         with(ui.card) { adapter = cardAdp }
         with(ui.deposit) { adapter = depAdp }

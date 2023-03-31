@@ -9,7 +9,7 @@ import com.cyril.account.databinding.CardItemBinding
 import com.cyril.account.home.domain.Card
 
 
-class CardRecyclerViewAdapter(util: CardDiffUtil, private val context: Context? = null) : ListAdapter<Card, CardRecyclerViewAdapter.ViewHolder>(util) {
+class CardRecyclerViewAdapter(util: CardDiffUtil) : ListAdapter<Card, CardRecyclerViewAdapter.ViewHolder>(util) {
     private var ls: CardListener? = null
 
     fun setCardListener (p: CardListener) {
@@ -17,7 +17,7 @@ class CardRecyclerViewAdapter(util: CardDiffUtil, private val context: Context? 
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder.from(parent, ls, context)
+        return ViewHolder.from(parent, ls)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -31,14 +31,14 @@ class CardRecyclerViewAdapter(util: CardDiffUtil, private val context: Context? 
 
     class ViewHolder private constructor(
         private val ui: CardItemBinding, private val ls: CardListener?,
-        private val context: Context? = null
+        private val context: Context
     ) : RecyclerView.ViewHolder(ui.root) {
         fun bind(item: Card) {
             with(ui) {
                 cardNameTitle.text = item.title
                 if(item.content.isNotBlank())
                     cardContent.text = item.content
-                else if(item.contentList != null && context != null)
+                else if(item.contentList != null)
                     cardContent.text = item.contentList.joinToString(separator = " ") {
                         it.asString(context)
                     }
@@ -52,11 +52,11 @@ class CardRecyclerViewAdapter(util: CardDiffUtil, private val context: Context? 
         }
 
         companion object {
-            fun from(parent: ViewGroup, ls: CardListener?, context: Context? = null): ViewHolder {
+            fun from(parent: ViewGroup, ls: CardListener?): ViewHolder {
                 return ViewHolder(
                     CardItemBinding.inflate(LayoutInflater.from(parent.context), parent, false),
                     ls,
-                    context
+                    parent.context
                 )
             }
         }
