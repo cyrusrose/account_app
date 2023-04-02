@@ -14,35 +14,35 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.navigation.navGraphViewModels
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.cyril.account.core.presentation.MainActivity
-import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
 import com.cyril.account.databinding.FragmentFireBinding
 import com.cyril.account.home.presentation.CardDiffUtil
 import com.cyril.account.start.presentation.StartViewModel
+import com.cyril.account.utils.UiText
+import com.google.android.material.snackbar.Snackbar
 import com.it.access.util.collectLatestLifecycleFlow
+import com.it.access.util.collectLifecycleFlow
+import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.flow.filterNotNull
-import java.math.BigDecimal
 import java.util.*
 
+@AndroidEntryPoint
 class FireFragment : Fragment() {
     private val fireVm: FireViewModel by viewModels()
-    private val mainVm: MainViewModel by activityViewModels()
     private val startVm: StartViewModel by hiltNavGraphViewModels(R.id.navigation_start)
 
     private lateinit var ui: FragmentFireBinding
     private val args: FireFragmentArgs by navArgs()
 
-    private lateinit var adp: MyCardRecyclerViewAdapter
+    private val adp by lazy { MyCardRecyclerViewAdapter(ui.content.rv, CardDiffUtil()) }
 
     private val getContact = registerForActivityResult(PhoneContact()) {
         it?.let {
@@ -51,11 +51,10 @@ class FireFragment : Fragment() {
     }
 
     private val getPermissions = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
+        if (isGranted)
             getContact.launch(null)
-        } else {
-            mainVm.setUserError(getString(R.string.contacts_title))
-        }
+        else
+            fireVm.setUpError(UiText.StringResource(R.string.contacts_title))
     }
 
     override fun onCreateView(
@@ -76,8 +75,6 @@ class FireFragment : Fragment() {
             fireVm.setUser(it)
         }
 
-        adp = MyCardRecyclerViewAdapter(ui.content.rv, CardDiffUtil())
-
         setModes()
         displayErrors()
         settingUpNavBar()
@@ -87,8 +84,17 @@ class FireFragment : Fragment() {
     }
 
     private fun displayErrors() {
-        fireVm.error.observe(viewLifecycleOwner) {
-            mainVm.setUserError(it)
+        viewLifecycleOwner.collectLifecycleFlow(fireVm.error) {
+            val snack = Snackbar.make(ui.root, it.asString(requireContext()), Snackbar.LENGTH_SHORT)
+            snack.show()
+        }
+
+        viewLifecycleOwner.collectLifecycleFlow(fireVm.moneyError) {
+            ui.content.money.error = it.asString(requireContext())
+        }
+
+        viewLifecycleOwner.collectLifecycleFlow(fireVm.otherError) {
+            ui.content.phone.error = it.asString(requireContext())
         }
     }
 
@@ -102,44 +108,23 @@ class FireFragment : Fragment() {
     }
 
     private fun makeTransfer() {
-        ui.content.send.setOnClickListener {
+        ui.content.send.setOnClickListener click@ {
             val moneyStr = ui.content.money.editText?.text.toString()
             val phoneNo = ui.content.phone.editText?.text.toString()
 
-            if (moneyStr.isNotBlank() && phoneNo.isNotBlank()) {
-                try {
-                    val money = moneyStr.toBigDecimal()
-                    val digits = phoneNo.toCharArray()
-                        .filter { it.isDigit() }
-                    if (digits.size != 11) {
-                        ui.content.phone.error = getString(R.string.digits_title)
-                        return@setOnClickListener
-                    }
-
-                    val itr = digits.iterator()
-                    val phone = "+@ (@@@) @@@-@@-@@".map {
-                        if (it == '@' && itr.hasNext())
-                            itr.next()
-                        else
-                            it
-                    }.joinToString(separator = "")
-
-                    if (money < BigDecimal(0.01))
-                        ui.content.money.error = getString(R.string.sum_title)
-                    else
-                        adp.card.value?.let {
-                            fireVm.sendMoneyByPhone(money, UUID.fromString(it.id), phone)
-                        }
-                } catch (e: Exception) {
-                    mainVm.setUserError(getString(R.string.strings_title))
-                }
-            } else {
-                if (moneyStr.isBlank())
-                    ui.content.money.error = getString(R.string.not_empty)
-                if (phoneNo.isBlank())
-                    ui.content.phone.error = getString(R.string.not_empty)
+            if (moneyStr.isBlank()) {
+                fireVm.setUpMoneyError(UiText.StringResource(R.string.not_empty))
+                return@click
+            }
+            if (phoneNo.isBlank())  {
+                fireVm.setUpOtherError(UiText.StringResource(R.string.not_empty))
+                return@click
             }
 
+            val money = moneyStr.toBigDecimal()
+            adp.card.value?.let {
+                fireVm.sendMoneyByPhone(money, UUID.fromString(it.id), phoneNo)
+            }
         }
 
         ui.content.money.editText?.doOnTextChanged { text, _, _, _ ->
@@ -158,7 +143,9 @@ class FireFragment : Fragment() {
     }
 
     private fun observeCards() {
-        fireVm.card.observe(viewLifecycleOwner) {
+        viewLifecycleOwner.collectLatestLifecycleFlow(
+            fireVm.card.filterNotNull()
+        ) {
             adp.submitList(it)
         }
     }
@@ -185,8 +172,8 @@ class FireFragment : Fragment() {
                 val idx = cursor.getColumnIndex(CommonDataKinds.Phone.NUMBER)
                 val phone = cursor.getString(idx)
 
-                with(ui.content.phone.editText) {
-                    this?.setText(phone)
+                ui.content.phone.editText?.apply {
+                    setText(phone)
                 }
             }
         }

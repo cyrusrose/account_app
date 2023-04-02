@@ -1,16 +1,13 @@
 package com.cyril.account.home.presentation
 
-import android.app.Application
 import android.util.Log
-import androidx.core.graphics.toColorInt
 import androidx.lifecycle.*
-import com.cyril.account.core.presentation.MainActivity
-import com.cyril.account.core.presentation.MainViewModel.UserError
 import com.cyril.account.R
+import com.cyril.account.core.data.response.ClientResp
+import com.cyril.account.core.data.response.UserResp
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.home.data.repository.PersonalRep
 import com.cyril.account.home.data.utils.CardTypes
-import com.cyril.account.core.data.response.UserResp
-import com.cyril.account.core.data.response.ClientResp
 import com.cyril.account.home.domain.Card
 import com.cyril.account.utils.DEBUG
 import com.cyril.account.utils.UiText
@@ -20,10 +17,8 @@ import com.it.access.util.retryAgainCatch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import java.net.SocketTimeoutException
 import java.util.*
 import javax.inject.Inject
-import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -116,7 +111,7 @@ class HomeViewModel @Inject constructor(
         if (client.defaultAccount?.id != UUID.fromString(card.id)) {
             val it = personalRep.changeDefault(client.id, UUID.fromString(card.id))
             if (!it.isSuccessful) {
-                Log.d(MainActivity.DEBUG, it.errorBody()?.string() ?: "Unknown")
+                Log.d(DEBUG, it.errorBody()?.string() ?: "Unknown")
                 _error.emit(UiText.StringResource(R.string.changing_error))
             }
         } else

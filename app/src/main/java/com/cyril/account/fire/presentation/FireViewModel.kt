@@ -1,60 +1,69 @@
 package com.cyril.account.fire.presentation
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.*
-import com.cyril.account.core.presentation.MainActivity
-import com.cyril.account.core.presentation.MainViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.cyril.account.R
-import com.cyril.account.core.data.ErrorResp
-import com.cyril.account.core.data.RetrofitClient
+import com.cyril.account.core.data.response.ErrorResp
+import com.cyril.account.core.data.response.UserResp
 import com.cyril.account.history.data.HistoryRep
 import com.cyril.account.home.data.repository.PersonalRep
-import com.cyril.account.core.data.response.UserResp
-import com.cyril.account.history.data.HistoryApi
-import com.cyril.account.home.data.api.PersonalApi
-import com.cyril.account.home.domain.Card
+import com.cyril.account.utils.DEBUG
+import com.cyril.account.utils.UiText
 import com.cyril.account.utils.cardEmpty
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import com.cyril.account.utils.phonePattern
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.it.access.util.retryAgainCatch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.net.SocketTimeoutException
 import java.util.*
+import javax.inject.Inject
 
-class FireViewModel(private val app: Application) : AndroidViewModel(app) {
+@HiltViewModel
+class FireViewModel @Inject constructor(
+    private val personalRep: PersonalRep,
+    private val histRep: HistoryRep,
+    private val mapper: ObjectMapper
+) : ViewModel() {
     private val usersState = MutableStateFlow<UserResp?>(null)
-    val user: LiveData<UserResp> = usersState.filterNotNull().asLiveData()
 
-    private val _error = MutableLiveData<MainViewModel.UserError>()
-    val error: LiveData<MainViewModel.UserError> = _error
+    private val _error = MutableSharedFlow<UiText>()
+    val error = _error.asSharedFlow()
 
-    private val histRep = HistoryRep(RetrofitClient.get().create(HistoryApi::class.java), Dispatchers.Default)
-    private val personalRep = PersonalRep(RetrofitClient.get().create(PersonalApi::class.java), Dispatchers.Main)
+    private val _moneyError = MutableSharedFlow<UiText>()
+    val moneyError = _moneyError.asSharedFlow()
+
+    private val _otherError = MutableSharedFlow<UiText>()
+    val otherError = _otherError.asSharedFlow()
+
+    private val handler = CoroutineExceptionHandler { _, throwable ->
+        viewModelScope.launch {
+            throwable.message?.let {
+                _error.emit(UiText.DynamicString(it))
+            }
+        }
+        Log.d(DEBUG, "Error: " + throwable.message)
+    }
+
+    private val scope = viewModelScope + handler
 
     val card = usersState.flatMapLatest {
-        if (it == null) {
-            flow {
-                emit(cardEmpty)
-            }
-        } else
+        if (it == null)
+            flowOf(cardEmpty)
+        else
             personalRep.getPersonalsToCardsFlat(it.client)
-                .retry {
-                    val time = it is SocketTimeoutException
-                    if (time) {
-                        delay(5000)
-                        _error.value = MainViewModel.UserError(app.resources.getString(R.string.trying_error))
-                        Log.d(MainActivity.DEBUG, it.message ?: "")
-                    }
-                    time
-                }.catch { e ->
-                    _error.value = MainViewModel.UserError(app.resources.getString(R.string.working_error))
-                    Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
-                }
-    }
-        .asLiveData()
+            .retryAgainCatch(_error)
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
 
     fun sendMoneyByClientNo(
         money: BigDecimal,
@@ -62,16 +71,16 @@ class FireViewModel(private val app: Application) : AndroidViewModel(app) {
         clientNo: BigInteger,
         clientSsn: BigInteger
     ) {
-        viewModelScope.launch {
-            try {
-                val it = histRep.sendMoneyByClientNo(money, senderAccountId, clientNo, clientSsn)
-                if (!it.isSuccessful) {
-                    Log.d(MainActivity.DEBUG, it.errorBody()?.string() ?: "Unknown")
-                    _error.value = MainViewModel.UserError(app.resources.getString(R.string.sending_error))
-                }
-            } catch (e: Exception) {
-                _error.value = MainViewModel.UserError(app.resources.getString(R.string.working_error))
-                Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
+        scope.launch {
+            if (money < BigDecimal("0.01")) {
+                _moneyError.emit(UiText.StringResource(R.string.sum_title))
+                cancel()
+            }
+
+            val it = histRep.sendMoneyByClientNo(money, senderAccountId, clientNo, clientSsn)
+            if (!it.isSuccessful) {
+                Log.d(DEBUG, it.errorBody()?.string() ?: "Unknown")
+                _error.emit(UiText.StringResource(R.string.sending_error))
             }
         }
     }
@@ -79,18 +88,33 @@ class FireViewModel(private val app: Application) : AndroidViewModel(app) {
     fun sendMoneyByPhone(
         money: BigDecimal,
         senderAccountId: UUID,
-        phone: String
+        phoneNo: String
     ) {
-        viewModelScope.launch {
-            try {
-                val it = histRep.sendMoneyByPhone(money, senderAccountId, phone)
-                if (!it.isSuccessful) {
-                    Log.d(MainActivity.DEBUG, it.errorBody()?.string() ?: "Unknown")
-                    _error.value = MainViewModel.UserError(app.resources.getString(R.string.sending_error))
-                }
-            } catch (e: Exception) {
-                _error.value = MainViewModel.UserError(app.resources.getString(R.string.working_error))
-                Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
+        scope.launch {
+            if (money < BigDecimal("0.01")) {
+                _moneyError.emit(UiText.StringResource(R.string.sum_title))
+                cancel()
+            }
+
+            val digits = phoneNo.toCharArray()
+                .filter { it.isDigit() }
+            if (digits.size != 11) {
+                _otherError.emit(UiText.StringResource(R.string.digits_title))
+                cancel()
+            }
+
+            val itr = digits.iterator()
+            val phone = phonePattern.map {
+                if (it == '@' && itr.hasNext())
+                    itr.next()
+                else
+                    it
+            }.joinToString(separator = "")
+
+            val it = histRep.sendMoneyByPhone(money, senderAccountId, phone)
+            if (!it.isSuccessful) {
+                Log.d(DEBUG, it.errorBody()?.string() ?: "Unknown")
+                _error.emit(UiText.StringResource(R.string.sending_error))
             }
         }
     }
@@ -100,28 +124,33 @@ class FireViewModel(private val app: Application) : AndroidViewModel(app) {
         senderAccountId: UUID,
         cardNo: BigInteger
     ) {
-        viewModelScope.launch {
-            try {
-                val it = histRep.sendMoneyByCard(money, senderAccountId, cardNo)
-                if (!it.isSuccessful) {
-                    val ans = it.errorBody()?.string()
-                    Log.d(MainActivity.DEBUG, ans ?: "Unknown")
-                    if (ans != null) {
-                        val resp = RetrofitClient.mapper.readValue(ans, ErrorResp::class.java)
-                        if (resp.message.contains("same account"))
-                            _error.value = MainViewModel.UserError(app.resources.getString(R.string.same_error))
-                        else if (resp.message.contains("receiver's card"))
-                            _error.value = MainViewModel.UserError(app.resources.getString(R.string.receiver_error))
-                        else
-                            _error.value = MainViewModel.UserError(app.resources.getString(R.string.sending_error))
-                    } else
-                        _error.value = MainViewModel.UserError(app.resources.getString(R.string.sending_error))
-                }
-            } catch (e: Exception) {
-                _error.value = MainViewModel.UserError(app.resources.getString(R.string.working_error))
-                Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
+        scope.launch {
+            if (money < BigDecimal("0.01")) {
+                _moneyError.emit(UiText.StringResource(R.string.sum_title))
+                cancel()
+            }
+
+            val it = histRep.sendMoneyByCard(money, senderAccountId, cardNo)
+            if (!it.isSuccessful) {
+                val ans = it.errorBody()?.string()
+                processError(ans)
             }
         }
+    }
+
+    private suspend fun processError(ans: String?) {
+        if (ans != null) {
+            Log.d(DEBUG, ans)
+
+            val resp = mapper.readValue(ans, ErrorResp::class.java)
+            if (resp.message.contains("same account"))
+                _error.emit(UiText.StringResource(R.string.same_error))
+            else if (resp.message.contains("receiver's card"))
+                _error.emit(UiText.StringResource(R.string.receiver_error))
+            else
+                _error.emit(UiText.StringResource(R.string.sending_error))
+        } else
+            _error.emit(UiText.StringResource(R.string.sending_error))
     }
 
     fun sendMoney(
@@ -129,26 +158,29 @@ class FireViewModel(private val app: Application) : AndroidViewModel(app) {
         senderAccountId: UUID,
         receiverAccountId: UUID
     ) {
-        viewModelScope.launch {
-            try {
-                val it = histRep.sendMoney(money, senderAccountId, receiverAccountId)
-                if (!it.isSuccessful) {
-                    val ans = it.errorBody()?.string()
-                    Log.d(MainActivity.DEBUG, ans ?: "Unknown")
-                    
-                    if (ans != null) {
-                        val resp = RetrofitClient.mapper.readValue(ans, ErrorResp::class.java)
-                        if (resp.message.contains("same account"))
-                            _error.value = MainViewModel.UserError(app.resources.getString(R.string.same_error))
-                        else
-                            _error.value = MainViewModel.UserError(app.resources.getString(R.string.sending_error))
-                    } else
-                        _error.value = MainViewModel.UserError(app.resources.getString(R.string.sending_error))
-                }
-            } catch (e: Exception) {
-                _error.value = MainViewModel.UserError(app.resources.getString(R.string.working_error))
-                Log.d(MainActivity.DEBUG, "Caught: ${e.message}")
+        scope.launch {
+            if (money < BigDecimal("0.01")) {
+                _moneyError.emit(UiText.StringResource(R.string.sum_title))
+                cancel()
             }
+
+            val it = histRep.sendMoney(money, senderAccountId, receiverAccountId)
+            if (!it.isSuccessful) {
+                val ans = it.errorBody()?.string()
+                processError(ans)
+            }
+        }
+    }
+
+    fun setUpMoneyError(msg: UiText) {
+        scope.launch {
+            _moneyError.emit(msg)
+        }
+    }
+
+    fun setUpOtherError(msg: UiText) {
+        scope.launch {
+            _otherError.emit(msg)
         }
     }
 
@@ -162,5 +194,11 @@ class FireViewModel(private val app: Application) : AndroidViewModel(app) {
                 user.client.defaultAccount?.id != mUser.client.defaultAccount?.id)
         )
             usersState.value = user
+    }
+
+    fun setUpError(msg: UiText) {
+        scope.launch {
+            _error.emit(msg)
+        }
     }
 }

@@ -15,14 +15,18 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupWithNavController
 import com.cyril.account.R
 import com.cyril.account.databinding.ActivityMainBinding
+import com.cyril.account.utils.DEBUG
+import com.cyril.account.utils.UiText
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
+import com.it.access.util.collectLatestLifecycleFlow
+import com.it.access.util.collectLifecycleFlow
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainVm: MainViewModel by viewModels()
     private val ui: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
@@ -32,13 +36,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(ui.root)
 
         setModes()
-        settingUpNavView()
         displayErrors()
+        settingUpNavView()
     }
 
     private fun displayErrors() {
-        mainViewModel.error.observe(this) {
-            val snack = Snackbar.make(ui.root, it.message, Snackbar.LENGTH_SHORT)
+        collectLifecycleFlow(mainVm.error) {
+            val snack = Snackbar.make(ui.root, it.asString(this), Snackbar.LENGTH_SHORT)
             snack.show()
         }
     }
@@ -53,14 +57,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         ui.navView.applyInsetter {
-
+            // avoid excess padding
         }
     }
 
     private fun settingUpNavView() {
         val nc = findNavController(R.id.nav_host_fragment_activity_main)
 
-//        ui.navView.setupWithNavController(nc)
         ui.navView.setOnItemSelectedListener {
             it.onNavDestinationSelected(nc)
                     val options = NavOptions.Builder()
@@ -72,7 +75,8 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        mainViewModel.bottomBar.observe(this) {
+        collectLifecycleFlow(mainVm.bottomBar) {
+            Log.d(DEBUG, "bottomBar: $it")
             ui.navView.visibility = if (it) View.VISIBLE else View.GONE
         }
 
@@ -80,7 +84,7 @@ class MainActivity : AppCompatActivity() {
             .map { it.itemId }.toList()
 
         nc.addOnDestinationChangedListener { nc, dest, args ->
-            Log.d(com.cyril.account.utils.DEBUG, nc.currentDestination?.displayName ?: "name")
+            Log.d(DEBUG, nc.currentDestination?.displayName ?: "name")
 
             if (dest.id != R.id.navigation_start) {
                 val color = MaterialColors.getColor(ui.navView, R.attr.colorSurface)
@@ -109,14 +113,10 @@ class MainActivity : AppCompatActivity() {
                 if (backPressedTime + 3000 > System.currentTimeMillis()) {
                     finish()
                 } else {
-                    mainViewModel.setUserError(getString(R.string.back_again_title))
+                    mainVm.setUpError(UiText.StringResource(R.string.back_again_title))
                 }
                 backPressedTime = System.currentTimeMillis()
             }
         }
-    }
-
-    companion object {
-        const val DEBUG = "cyrus"
     }
 }

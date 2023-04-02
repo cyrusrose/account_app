@@ -1,4 +1,4 @@
-package com.cyril.account.core.data
+package com.cyril.account.core.data.response
 
 data class ErrorResp(
     val status: Int,

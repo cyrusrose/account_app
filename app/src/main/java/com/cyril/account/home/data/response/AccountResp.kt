@@ -1,6 +1,6 @@
 package com.cyril.account.home.data.response
 
-import com.cyril.account.core.data.RetrofitClient
+import com.cyril.account.core.utils.RetrofitUtils.mapper
 import java.math.BigDecimal
 import java.util.*
 
@@ -16,6 +16,6 @@ open class AccountResp(
 
 ) {
     override fun toString(): String {
-        return RetrofitClient.mapper.writeValueAsString(this)
+        return mapper.writeValueAsString(this)
     }
 }

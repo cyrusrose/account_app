@@ -3,22 +3,26 @@ package com.cyril.account.home.data.repository
 import android.content.res.Resources
 import android.util.Log
 import androidx.core.graphics.toColorInt
-import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.R
-import com.cyril.account.home.data.api.PersonalApi
-import com.cyril.account.home.data.utils.CardTypes
 import com.cyril.account.core.data.response.ClientResp
 import com.cyril.account.core.presentation.BindableSpinnerAdapter
+import com.cyril.account.home.data.api.PersonalApi
 import com.cyril.account.home.data.response.*
+import com.cyril.account.home.data.utils.CardTypes
 import com.cyril.account.home.domain.Card
+import com.cyril.account.utils.DEBUG
 import com.cyril.account.utils.Resource
 import com.cyril.account.utils.UiText
 import com.cyril.account.utils.cardEmpty
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import java.net.HttpURLConnection
-import java.net.SocketTimeoutException
 import java.util.*
 
 class PersonalRep(
@@ -33,9 +37,9 @@ class PersonalRep(
                     emit(personals.body()!!)
                 else
                     emit(emptyList())
-                Log.d(MainActivity.DEBUG, "Emit PersonalRep, status ${personals.code()}")
+                Log.d(DEBUG, "Emit PersonalRep, status ${personals.code()}")
             } else {
-                Log.d(MainActivity.DEBUG, "Error PersonalRep: UserRep.getUser: " + (personals.errorBody()?.string() ?: "Unknown"))
+                Log.d(DEBUG, "Error PersonalRep: UserRep.getUser: " + (personals.errorBody()?.string() ?: "Unknown"))
                 emit(emptyList())
             }
             delay(refreshRate)
@@ -169,9 +173,9 @@ class PersonalRep(
                     emit(personals.body()!!)
                 else
                     emit(emptyList())
-                Log.d(MainActivity.DEBUG, "Emit PersonalRep, status ${personals.code()}")
+                Log.d(DEBUG, "Emit PersonalRep, status ${personals.code()}")
             } else {
-                Log.d(MainActivity.DEBUG, "Error PersonalRep: UserRep.getUser: " + (personals.errorBody()?.string() ?: "Unknown"))
+                Log.d(DEBUG, "Error PersonalRep: UserRep.getUser: " + (personals.errorBody()?.string() ?: "Unknown"))
                 emit(emptyList())
             }
             delay(refreshRate)

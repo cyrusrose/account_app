@@ -6,30 +6,32 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cyril.account.home.data.repository.PersonalRep
 import com.cyril.account.home.presentation.Item
+import com.cyril.account.utils.UiText
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
-    private val _bottomBar = MutableLiveData<Boolean>()
-    val bottomBar: LiveData<Boolean> get() = _bottomBar
+    private val _bottomBar = MutableSharedFlow<Boolean>(replay = 1)
+    val bottomBar = _bottomBar.asSharedFlow()
 
-    data class UserError(val message: String)
-    private val _error = MutableLiveData<UserError>()
-    val error: LiveData<UserError> = _error
+    private val _error = MutableSharedFlow<UiText>()
+    val error = _error.asSharedFlow()
 
     fun navigateToHome() {
-        _bottomBar.value = true
+        viewModelScope.launch {
+            _bottomBar.emit(true)
+        }
     }
 
     fun navigateToStart() {
-        _bottomBar.value = false
+        viewModelScope.launch {
+            _bottomBar.emit(false)
+        }
     }
 
-    fun setUserError(msg: UserError) {
-        _error.value = msg
-    }
-
-    fun setUserError(msg: String) {
-        _error.value = UserError(msg)
+    fun setUpError(msg: UiText) {
+        viewModelScope.launch {
+            _error.emit(msg)
+        }
     }
 }

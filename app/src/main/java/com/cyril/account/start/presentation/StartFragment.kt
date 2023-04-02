@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.filterNotNull
 @AndroidEntryPoint
 class StartFragment : Fragment() {
     private val startVm: StartViewModel by hiltNavGraphViewModels(R.id.navigation_start)
-    private val mainViewModel: MainViewModel by activityViewModels()
+    private val mainVm: MainViewModel by activityViewModels()
     private lateinit var ui: FragmentStartBinding
     private val args: StartFragmentArgs by navArgs()
 
@@ -37,7 +37,7 @@ class StartFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mainViewModel.navigateToStart()
+        mainVm.navigateToStart()
 
         login()
         errors()

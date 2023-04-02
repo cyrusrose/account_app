@@ -1,6 +1,5 @@
 package com.cyril.account.core.di
 
-import com.cyril.account.core.data.RetrofitClient
 import com.cyril.account.utils.baseUrl
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper

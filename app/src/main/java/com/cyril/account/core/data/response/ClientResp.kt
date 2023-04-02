@@ -1,6 +1,6 @@
 package com.cyril.account.core.data.response
 
-import com.cyril.account.core.data.RetrofitClient
+import com.cyril.account.core.utils.RetrofitUtils.mapper
 import com.cyril.account.home.data.response.PersonalResp
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -18,6 +18,6 @@ open class ClientResp(
     val defaultAccount: PersonalResp?
 ) {
     override fun toString(): String {
-        return RetrofitClient.mapper.writeValueAsString(this)
+        return mapper.writeValueAsString(this)
     }
 }

@@ -2,20 +2,18 @@ package com.cyril.account.history.data
 
 import android.content.res.Resources
 import android.util.Log
-import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.R
-import com.cyril.account.core.data.RetrofitClient
-import com.cyril.account.history.domain.History
 import com.cyril.account.core.presentation.BindableSpinnerAdapter
+import com.cyril.account.utils.DEBUG
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.net.HttpURLConnection
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 class HistoryRep(
@@ -35,11 +33,11 @@ class HistoryRep(
                     emit(history.body()!!)
                 else {
                     emit(emptyList())
-                    Log.d(MainActivity.DEBUG, "Warning HistoryRep, status ${history.code()}")
+                    Log.d(DEBUG, "Warning HistoryRep, status ${history.code()}")
                 }
             } else {
                 Log.d(
-                    MainActivity.DEBUG,
+                    DEBUG,
                     "Error HistoryRep: UserRep.getUser: " + (history.errorBody()?.string()
                         ?: "Unknown")
                 )

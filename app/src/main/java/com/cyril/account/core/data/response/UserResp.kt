@@ -1,6 +1,6 @@
 package com.cyril.account.core.data.response
 
-import com.cyril.account.core.data.RetrofitClient.mapper
+import com.cyril.account.core.utils.RetrofitUtils.mapper
 import java.util.UUID
 
 data class UserResp(

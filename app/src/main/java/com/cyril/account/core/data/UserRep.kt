@@ -4,9 +4,9 @@ import android.content.res.AssetManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.util.Log
-import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.payment.domain.Payment
 import com.cyril.account.payment.domain.Transfer
+import com.cyril.account.utils.DEBUG
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
@@ -55,12 +55,12 @@ class UserRep(
                 if (user.code() == HttpURLConnection.HTTP_OK) {
                     emit(user.body())
                 } else {
-                    Log.d(MainActivity.DEBUG, "Warning: UserRep.getUser")
+                    Log.d(DEBUG, "Warning: UserRep.getUser")
                     emit(null)
                     break
                 }
             } else {
-                Log.d(MainActivity.DEBUG, "Error: UserRep.getUser: " + (user.errorBody()?.string() ?: "Unknown"))
+                Log.d(DEBUG, "Error: UserRep.getUser: " + (user.errorBody()?.string() ?: "Unknown"))
                 emit(null)
                 break
             }
@@ -76,11 +76,11 @@ class UserRep(
                 if (nos.code() == HttpURLConnection.HTTP_OK) {
                     emit(nos.body()!!)
                 } else {
-                    Log.d(MainActivity.DEBUG, "Warning: UserRep.getClientNos, code ${nos.code()}")
+                    Log.d(DEBUG, "Warning: UserRep.getClientNos, code ${nos.code()}")
                     emit(emptyList())
                 }
             } else {
-                Log.d(MainActivity.DEBUG, "Error: UserRep.getClientNos: " + (nos.errorBody()?.string() ?: "Unknown"))
+                Log.d(DEBUG, "Error: UserRep.getClientNos: " + (nos.errorBody()?.string() ?: "Unknown"))
                 emit(emptyList())
             }
             delay(refreshRate)

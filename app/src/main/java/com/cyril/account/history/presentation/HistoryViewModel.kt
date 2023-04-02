@@ -40,6 +40,12 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+
+        Log.d(DEBUG, "HistoryViewModel cleared")
+    }
+
     private val usersState = MutableStateFlow<HistoryState?>(null)
 
     private val _error = MutableSharedFlow<UiText>()

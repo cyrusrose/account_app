@@ -1,6 +1,6 @@
 package com.cyril.account.history.data
 
-import com.cyril.account.core.data.RetrofitClient.mapper
+import com.cyril.account.core.utils.RetrofitUtils.mapper
 import com.cyril.account.home.data.response.CurrencyResp
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize

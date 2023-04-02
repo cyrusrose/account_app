@@ -6,35 +6,35 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.navigation.navGraphViewModels
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import com.cyril.account.core.presentation.MainActivity
-import com.cyril.account.core.presentation.MainViewModel
 import com.cyril.account.R
+import com.cyril.account.core.presentation.MainActivity
 import com.cyril.account.databinding.FragmentFireCardBinding
 import com.cyril.account.home.presentation.CardDiffUtil
 import com.cyril.account.start.presentation.StartViewModel
+import com.cyril.account.utils.UiText
+import com.google.android.material.snackbar.Snackbar
 import com.it.access.util.collectLatestLifecycleFlow
+import com.it.access.util.collectLifecycleFlow
+import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.flow.filterNotNull
-import java.math.BigDecimal
 import java.util.*
 
+@AndroidEntryPoint
 class FireCardFragment : Fragment() {
     private val fireVm: FireViewModel by viewModels()
-    private val mainVm: MainViewModel by activityViewModels()
     private val startVm: StartViewModel by hiltNavGraphViewModels(R.id.navigation_start)
 
     private lateinit var ui: FragmentFireCardBinding
     private val args: FireCardFragmentArgs by navArgs()
 
-    private lateinit var adp: MyCardRecyclerViewAdapter
+    private val adp by lazy { MyCardRecyclerViewAdapter(ui.content.rv, CardDiffUtil()) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,7 +54,6 @@ class FireCardFragment : Fragment() {
             fireVm.setUser(it)
         }
 
-        adp = MyCardRecyclerViewAdapter(ui.content.rv, CardDiffUtil())
         setModes()
         displayErrors()
         settingUpNavBar()
@@ -63,8 +62,17 @@ class FireCardFragment : Fragment() {
     }
 
     private fun displayErrors() {
-        fireVm.error.observe(viewLifecycleOwner) {
-            mainVm.setUserError(it)
+        viewLifecycleOwner.collectLifecycleFlow(fireVm.error) {
+            val snack = Snackbar.make(ui.root, it.asString(requireContext()), Snackbar.LENGTH_SHORT)
+            snack.show()
+        }
+
+        viewLifecycleOwner.collectLifecycleFlow(fireVm.moneyError) {
+            ui.content.money.error = it.asString(requireContext())
+        }
+
+        viewLifecycleOwner.collectLifecycleFlow(fireVm.otherError) {
+            ui.content.card.error = it.asString(requireContext())
         }
     }
 
@@ -91,29 +99,23 @@ class FireCardFragment : Fragment() {
     }
 
     private fun makingTransfer() {
-        ui.content.send.setOnClickListener {
+        ui.content.send.setOnClickListener click@ {
             val moneyStr = ui.content.money.editText?.text.toString()
             val cardNoStr = ui.content.card.editText?.text.toString()
 
-            if (moneyStr.isNotBlank() && cardNoStr.isNotBlank()) {
-                try {
-                    val money = moneyStr.toBigDecimal()
-                    val cardNo = cardNoStr.toBigInteger()
+            if (moneyStr.isBlank()) {
+                fireVm.setUpMoneyError(UiText.StringResource(R.string.not_empty))
+                return@click
+            }
+            if (cardNoStr.isBlank())  {
+                fireVm.setUpOtherError(UiText.StringResource(R.string.not_empty))
+                return@click
+            }
 
-                    if (money < BigDecimal(0.01))
-                        ui.content.money.error = getString(R.string.sum_title)
-                    else
-                        adp.card.value?.let {
-                            fireVm.sendMoneyByCard(money, UUID.fromString(it.id), cardNo)
-                        }
-                } catch (e: Exception) {
-                    mainVm.setUserError(getString(R.string.strings_title))
-                }
-            } else {
-                if (moneyStr.isBlank())
-                    ui.content.money.error = getString(R.string.not_empty)
-                if (cardNoStr.isBlank())
-                    ui.content.card.error = getString(R.string.not_empty)
+            val money = moneyStr.toBigDecimal()
+            val cardNo = cardNoStr.toBigInteger()
+            adp.card.value?.let {
+                fireVm.sendMoneyByCard(money, UUID.fromString(it.id), cardNo)
             }
 
         }
@@ -128,7 +130,9 @@ class FireCardFragment : Fragment() {
     }
 
     private fun observeCards() {
-        fireVm.card.observe(viewLifecycleOwner) {
+        viewLifecycleOwner.collectLatestLifecycleFlow(
+            fireVm.card.filterNotNull()
+        ) {
             adp.submitList(it)
         }
     }
