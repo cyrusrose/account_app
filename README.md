@@ -32,23 +32,23 @@ In this branch you'll find:
 `Home` panel:
 
 <p align="center">
-  <img src="/images/home.gif" width="50%" />
+  <img src="/images/home.gif" width="40%" />
 </p>
 
 `History` panel:
 
 <p align="center">
-  <img src="/images/history.gif" width="50%" />
+  <img src="/images/history.gif" width="40%" />
 </p>
 
 `Payment` panel:
 
 <p align="center">
-  <img src="/images/payment.gif" width="50%" />
+  <img src="/images/payment.gif" width="40%" />
 </p>
 
 `Shop-window` panel:
 
 <p align="center">
-  <img src="/images/shopwindow.gif" width="50%" />
+  <img src="/images/shopwindow.gif" width="40%" />
 </p>
