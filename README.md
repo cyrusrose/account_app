@@ -32,23 +32,23 @@ In this branch you'll find:
 `Home` panel:
 
 <p align="center">
-  <video src="/images/home.mp4" width="25%" autoplay loop/>
+  <img src="/images/home.gif" width="25%" />
 </p>
 
 `History` panel:
 
 <p align="center">
-  <video src="/images/history.mp4" width="25%" autoplay loop/>
+  <img src="/images/history.gif" width="25%" />
 </p>
 
 `Payment` panel:
 
 <p align="center">
-  <video src="/images/payment.mp4" width="25%" autoplay loop/>
+  <img src="/images/payment.gif" width="25%" />
 </p>
 
 `Shop-window` panel:
 
 <p align="center">
-  <video src="/images/shopwindow.mp4" width="25%" autoplay loop/>
+  <img src="/images/shopwindow.gif" width="25%" />
 </p>
