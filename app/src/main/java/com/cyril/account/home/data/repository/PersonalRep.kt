@@ -29,7 +29,7 @@ class PersonalRep(
     private val personalApi: PersonalApi,
     private val dispatcher: CoroutineDispatcher
 ) {
-    fun getPersonals(clientId: UUID, refreshRate: Long = 8000) = flow {
+    fun getPersonals(clientId: UUID, refreshRate: Long = 4000) = flow {
         while(true) {
             val personals = personalApi.getPersonal(clientId)
             if(personals.isSuccessful) {
@@ -47,7 +47,7 @@ class PersonalRep(
     }
         .conflate()
 
-    fun getPersonalsToCards(client: ClientResp, refreshRate: Long = 8000) =
+    fun getPersonalsToCards(client: ClientResp, refreshRate: Long = 4000) =
         getPersonals(client.id, refreshRate)
         .transform {
             if (it.isEmpty())
@@ -77,7 +77,7 @@ class PersonalRep(
             }
         }
 
-    fun getPersonalsToCardsFlat(client: ClientResp, refreshRate: Long = 8000) =
+    fun getPersonalsToCardsFlat(client: ClientResp, refreshRate: Long = 4000) =
         getPersonals(client.id, refreshRate)
             .transform {
                 if (it.isEmpty())

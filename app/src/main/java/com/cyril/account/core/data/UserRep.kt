@@ -48,7 +48,7 @@ class UserRep(
         }
     }
 
-    fun getUser(login: String, password: String, refreshRate: Long = 8000) = flow {
+    fun getUser(login: String, password: String, refreshRate: Long = 6000) = flow {
         while(true) {
             val user = userApi.getUserWithClient(login, password)
             if(user.isSuccessful) {
