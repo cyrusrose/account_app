@@ -92,7 +92,7 @@ class FireAccountsFragment : Fragment() {
             setOf( R.id.navigation_payment )
         )
         ui.tb.setupWithNavController(nc, conf)
-        ui.tb.title = title
+        activity.supportActionBar?.title = title
     }
 
     private fun makingTransfer() {

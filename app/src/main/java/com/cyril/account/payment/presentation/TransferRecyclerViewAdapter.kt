@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.cyril.account.databinding.PaddingItemBinding
 import com.cyril.account.databinding.PaymentItemBinding
 import com.cyril.account.databinding.TitleItemBinding
 import com.cyril.account.payment.domain.*

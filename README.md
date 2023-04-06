@@ -1,6 +1,6 @@
 # Marketplace App
 
-A sample app for handling transactions.
+A sample view-based project for handling transactions.
 <p align="center">
 
 [//]: # (<img src="/images/store.png"/>)
@@ -28,4 +28,3 @@ In this branch you'll find:
 
 [//]: # (<img src="/images/details.gif" width="25%" />)
 </p>
-

@@ -114,6 +114,10 @@ class ShopBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun observeCards() {
+        with(ui) {
+            rv.isNestedScrollingEnabled = false
+        }
+
         adp.card.observe(viewLifecycleOwner) {
             shopVm.setAcc(it)
         }

@@ -35,6 +35,7 @@ class PersonaFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         settingUpNavBar()
+        setUpAdapters()
     }
 
     private fun settingUpNavBar() {
@@ -44,6 +45,12 @@ class PersonaFragment : Fragment() {
 
         val conf = AppBarConfiguration( setOf( R.id.navigation_home ) )
         ui.fireTb.setupWithNavController(nc, conf)
-        ui.fireTb.title = null
+        activity.supportActionBar?.title = null
+    }
+
+    private fun setUpAdapters() {
+        with(ui.contentPersona.fireCardRv) {
+            isNestedScrollingEnabled = false
+        }
     }
 }

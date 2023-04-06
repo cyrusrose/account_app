@@ -95,7 +95,7 @@ class FireCardFragment : Fragment() {
             setOf( R.id.navigation_payment )
         )
         ui.tb.setupWithNavController(nc, conf)
-        ui.tb.title = title
+        activity.supportActionBar?.title = title
     }
 
     private fun makingTransfer() {
@@ -130,6 +130,8 @@ class FireCardFragment : Fragment() {
     }
 
     private fun observeCards() {
+        ui.content.rv.isNestedScrollingEnabled = false
+
         viewLifecycleOwner.collectLatestLifecycleFlow(
             fireVm.card.filterNotNull()
         ) {
