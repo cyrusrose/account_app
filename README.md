@@ -1,4 +1,4 @@
-# Marketplace App
+# Account App
 
 A sample view-based project for handling transactions.
 
