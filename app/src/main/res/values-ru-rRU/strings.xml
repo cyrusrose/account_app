@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ваш банк</string>
-    <string name="title_home">Домик</string>
+    <string name="title_home">Главная</string>
     <string name="title_history">История</string>
     <string name="title_payment">Оплата</string>
     <string name="title_shopwindow">Витрина</string>
@@ -18,7 +18,7 @@
     <string name="transfers_title">Переводы</string>
     <string name="payment_title">Оплата</string>
     <string name="receiver_phone_title">Телефон получателя</string>
-    <string name="sum_of_money_title">Сумма денег</string>
+    <string name="sum_of_money_title">Сумма</string>
     <string name="send_title">Отправить</string>
     <string name="receiver_card_title">Карта получателя</string>
     <string name="client_number_title">Лицевой счет</string>

@@ -23,7 +23,7 @@
     <string name="transfers_title">Transfers</string>
     <string name="payment_title">Payment</string>
     <string name="receiver_phone_title">Receiver phone</string>
-    <string name="sum_of_money_title">Sum of money</string>
+    <string name="sum_of_money_title">Sum</string>
     <string name="send_title">Send</string>
     <string name="receiver_card_title">Receiver card</string>
     <string name="client_number_title">Client number</string>
@@ -40,7 +40,7 @@
     <string name="no_title">No</string>
     <string name="no_min_amout">No min amount</string>
     <string name="delete_title">Delete</string>
-    <string name="not_enough_title">Not enough money</string>
+    <string name="not_enough_title">Not enough fonds</string>
     <string name="success_title">Success</string>
     <string name="name_title">Name</string>
     <string name="phone_title">Phone</string>
